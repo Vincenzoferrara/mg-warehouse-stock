@@ -21,4 +21,8 @@ require_once MGWS_PLUGIN_DIR . '/includes/class-mgws-plugin.php';
 
 register_activation_hook(MGWS_PLUGIN_FILE, array('MGWS_Plugin', 'activate'));
 
+// The callback is defined in uninstall.php, which WordPress includes before
+// calling it. Nothing here may reference the function at load time.
+register_uninstall_hook(MGWS_PLUGIN_FILE, 'mgws_uninstall_all');
+
 add_action('plugins_loaded', array('MGWS_Plugin', 'instance'));

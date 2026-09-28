@@ -76,6 +76,10 @@ function register_activation_hook(string $file, mixed $callback): void {
     $GLOBALS['mgws_test_activation_hook'] = array($file, $callback);
 }
 
+function register_uninstall_hook(string $file, mixed $callback): void {
+    $GLOBALS['mgws_test_uninstall_hook'] = array($file, $callback);
+}
+
 function register_rest_route(string $namespace, string $route, array $definition): bool {
     $GLOBALS['mgws_test_routes'][$namespace][$route] = $definition;
     return true;
