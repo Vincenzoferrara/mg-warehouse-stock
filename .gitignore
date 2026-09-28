@@ -1,0 +1,40 @@
+# File di sistema operativo e editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Log e file temporanei
+*.log
+*.temp
+*.tmp
+*.bak
+*.orig
+.php-cs-fixer.cache
+.phpunit.result.cache
+
+# Segreti e configurazione locale
+.env
+.env.*
+!.env.example
+
+# Dipendenze
+vendor/
+node_modules/
+
+# Artefatti di build e distribuzione
+dist/
+build/
+*.zip
+*.tar.gz
+
+# Cache WP-CLI
+.wp-cli.cache/
+
+# Lavoro temporaneo di debug: mai versionare
+.write_test
+tests/_tmp*

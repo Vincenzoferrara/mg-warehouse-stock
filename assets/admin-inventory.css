@@ -1,0 +1,7 @@
+.mgws-transfer-only {
+  display: none;
+}
+
+body.mgws-show-transfer .mgws-transfer-only {
+  display: table-row;
+}

@@ -1,0 +1,200 @@
+.mgws-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#mgws-master-filter {
+  height: 32px;
+}
+
+#mgws-master-tree .mgws-node {
+  border: 1px solid #dcdcde;
+  background: #fff;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.mgws-node-header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.mgws-node-header .mgws-title {
+  flex: 1;
+  min-width: 240px;
+  margin: 0;
+}
+
+#mgws-master-tree .mgws-node h2,
+#mgws-master-tree .mgws-node h3 {
+  margin: 0;
+}
+
+.mgws-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.mgws-wh-links {
+  margin-top: 10px;
+}
+
+.mgws-row .button {
+  white-space: nowrap;
+}
+
+.mgws-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid #dcdcde;
+  border-radius: 999px;
+  background: #f6f7f7;
+  font-size: 12px;
+}
+
+.mgws-tree {
+  margin-top: 10px;
+  border-top: 1px solid #f0f0f1;
+  padding-top: 8px;
+}
+
+.mgws-tree details {
+  margin: 8px 0;
+}
+
+.mgws-tree summary {
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Frame rooms like Site/Warehouse cards */
+.mgws-tree details.mgws-room {
+  border: 1px solid #dcdcde;
+  border-radius: 4px;
+  background: #fff;
+  padding: 8px 10px;
+}
+
+.mgws-tree details.mgws-room > summary {
+  padding: 2px 0;
+}
+
+/* Frame racks inside rooms */
+.mgws-tree details.mgws-rack {
+  margin: 8px 0 0;
+  border: 1px solid #eef0f2;
+  border-radius: 4px;
+  background: #fcfcfd;
+  padding: 8px 10px;
+}
+
+.mgws-tree details.mgws-rack > summary {
+  padding: 2px 0;
+}
+
+.mgws-tree summary .mgws-summary-title {
+  font-weight: 600;
+}
+
+.mgws-tree summary .button {
+  height: 28px;
+  line-height: 26px;
+}
+
+.button-link-delete {
+  color: #b32d2e;
+}
+
+.button-link-delete:hover {
+  color: #8a2424;
+}
+
+.mgws-shelves {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 6px 0 0;
+}
+
+.mgws-tree details.mgws-room .mgws-shelves,
+.mgws-tree details.mgws-room p {
+  margin-left: 8px;
+}
+
+.mgws-shelves .mgws-chip {
+  background: #fff;
+}
+
+.mgws-inline {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.mgws-inline select,
+.mgws-inline input {
+  min-width: 220px;
+}
+
+.mgws-ok {
+  color: #1e7e34;
+  font-weight: 600;
+}
+
+.mgws-err {
+  color: #b32d2e;
+  font-weight: 600;
+}
+
+/* Simple modal */
+#mgws-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+}
+
+#mgws-modal .mgws-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+#mgws-modal .mgws-modal-dialog {
+  position: relative;
+  width: min(560px, calc(100% - 32px));
+  margin: 8vh auto 0;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+#mgws-modal .mgws-modal-header,
+#mgws-modal .mgws-modal-footer {
+  padding: 12px 14px;
+  border-bottom: 1px solid #dcdcde;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+#mgws-modal .mgws-modal-footer {
+  border-top: 1px solid #dcdcde;
+  border-bottom: none;
+  justify-content: flex-end;
+}
+
+#mgws-modal .mgws-modal-body {
+  padding: 14px;
+}

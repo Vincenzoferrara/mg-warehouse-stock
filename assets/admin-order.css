@@ -1,0 +1,44 @@
+#mgws-tree .mgws-site {
+  border: 1px solid #dcdcde;
+  padding: 6px;
+  margin-bottom: 6px;
+}
+
+.mgws-site-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.mgws-warehouse {
+  border-left: 3px solid #2271b1;
+  padding-left: 8px;
+  margin: 8px 0;
+}
+
+.mgws-card {
+  border: 1px solid #dcdcde;
+  padding: 6px;
+  margin: 8px 0;
+}
+
+.mgws-card-title {
+  font-weight: 600;
+}
+
+.mgws-locations {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+}
+
+.mgws-locations th,
+.mgws-locations td {
+  border-top: 1px solid #dcdcde;
+  padding: 4px;
+  text-align: left;
+}
+
+.mgws-warning {
+  color: #b32d2e;
+  font-weight: 600;
+}

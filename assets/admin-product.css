@@ -1,0 +1,194 @@
+#mgws-product-levels table {
+  border-collapse: collapse;
+}
+
+#mgws-product-levels th,
+#mgws-product-levels td {
+  border-top: 1px solid #dcdcde;
+  padding: 4px;
+  text-align: left;
+}
+
+.mgws-help {
+  display: inline-block;
+  color: #50575e;
+}
+
+.mgws-loc-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  overflow-x: auto;
+}
+
+.mgws-loc-card {
+  border: 1px solid #dcdcde;
+  background: #fff;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+
+.mgws-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.mgws-field-label {
+  display: block;
+  text-align: center;
+}
+
+.mgws-loc-field {
+  flex: 1 1 auto;
+}
+
+.mgws-op.button-primary {
+  border-color: #2271b1;
+  background: #2271b1;
+  color: #fff;
+}
+
+.mgws-inline {
+  display: flex;
+  align-items: center;
+}
+
+.mgws-inline select {
+  flex: 1;
+}
+
+.mgws-inline .select2-container {
+  flex: 1;
+}
+
+.mgws-inline .mgws-add[disabled] {
+  opacity: 0.55;
+}
+
+
+.mgws-variation-defaults .mgws-var-table {
+  font-size: 15px;
+  table-layout: fixed;
+  width: max-content;
+  min-width: 100%;
+}
+
+.mgws-variation-defaults .mgws-var-table thead th {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 2;
+}
+
+.mgws-variation-defaults .mgws-var-table th {
+  position: relative;
+  white-space: nowrap;
+}
+
+.mgws-variation-defaults .mgws-col-resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 100%;
+  cursor: col-resize;
+  user-select: none;
+}
+
+.mgws-variation-defaults .mgws-col-resizer:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 4px;
+  width: 1px;
+  height: 100%;
+  background: rgba(0,0,0,0.12);
+}
+
+body.mgws-col-dragging {
+  cursor: col-resize;
+}
+
+.mgws-variation-defaults table tbody tr:nth-child(2n) td {
+  background: #fcfcfd;
+}
+
+.mgws-variation-defaults table tbody tr:hover td {
+  background: #f6f7f7;
+}
+
+/* Hide Woo stock UI outside MGWS "Magazzino" tab. */
+#inventory_product_data ._manage_stock_field,
+#inventory_product_data ._stock_field,
+#inventory_product_data ._stock_status_field,
+#inventory_product_data ._backorders_field,
+#inventory_product_data ._sold_individually_field,
+#inventory_product_data ._low_stock_amount_field,
+#inventory_product_data ._stock_status_field {
+  display: none;
+}
+
+.woocommerce_variation ._manage_stock_field,
+.woocommerce_variation .variable_manage_stock_field,
+.woocommerce_variation .form-row.form-row-full._stock_field,
+.woocommerce_variation .form-row.form-row-full.variable_stock,
+.woocommerce_variation .form-row.form-row-full.variable_stock_status,
+.woocommerce_variation .form-row.form-row-full.variable_backorders,
+.woocommerce_variation .form-row.form-row-full.variable_low_stock_amount {
+  display: none;
+}
+
+#mgws-product-msg {
+}
+
+.mgws-ok {
+  color: #1e7e34;
+  font-weight: 600;
+}
+
+.mgws-err {
+  color: #b32d2e;
+  font-weight: 600;
+}
+
+/* Simple modal (shared with admin master page) */
+#mgws-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+}
+
+#mgws-modal .mgws-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+#mgws-modal .mgws-modal-dialog {
+  position: relative;
+  margin: 8vh auto 0;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+#mgws-modal .mgws-modal-header,
+#mgws-modal .mgws-modal-footer {
+  padding: 12px 14px;
+  border-bottom: 1px solid #dcdcde;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#mgws-modal .mgws-modal-footer {
+  border-top: 1px solid #dcdcde;
+  border-bottom: none;
+  justify-content: flex-end;
+}
+
+#mgws-modal .mgws-modal-body {
+  padding: 14px;
+}
