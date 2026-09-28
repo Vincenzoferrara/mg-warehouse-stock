@@ -80,6 +80,38 @@ function register_uninstall_hook(string $file, mixed $callback): void {
     $GLOBALS['mgws_test_uninstall_hook'] = array($file, $callback);
 }
 
+// The gettext family, with the behaviour WordPress actually has: with no
+// catalogue loaded, __() hands back the source string untouched. The source is
+// English, so a test asserting on it asserts on the plugin's own wording. A
+// test that loaded a real .mo would be testing a translation instead.
+
+function __(string $text, string $domain = 'default'): string {
+    return $text;
+}
+
+function esc_html__(string $text, string $domain = 'default'): string {
+    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+}
+
+function esc_attr__(string $text, string $domain = 'default'): string {
+    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+}
+
+function _x(string $text, string $context, string $domain = 'default'): string {
+    return $text;
+}
+
+function _n_noop(string $singular, string $plural, ?string $domain = null): array {
+    return array(
+        0 => $singular,
+        1 => $plural,
+        'singular' => $singular,
+        'plural' => $plural,
+        'context' => null,
+        'domain' => $domain,
+    );
+}
+
 function register_rest_route(string $namespace, string $route, array $definition): bool {
     $GLOBALS['mgws_test_routes'][$namespace][$route] = $definition;
     return true;

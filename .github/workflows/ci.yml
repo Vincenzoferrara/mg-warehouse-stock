@@ -64,6 +64,12 @@ jobs:
       - name: Uninstall routine
         run: php tests/uninstall_test.php
 
+      # A .pot left stale by a new gettext call ships a string that no
+      # translator will ever see, and the omission is invisible. The build
+      # depends on this job, so a release cannot go out with a stale catalogue.
+      - name: Translation template is current
+        run: php bin/make-pot.php --check
+
   build:
     name: Release archive
     runs-on: ubuntu-latest

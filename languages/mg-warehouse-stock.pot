@@ -1,0 +1,501 @@
+# Translation template for the MG Warehouse Stock plugin.
+# Copyright (C) 2026 Vincenzo Ferrara
+# This file is distributed under the same license as the plugin.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: MG Warehouse Stock 2.3.0\n"
+"Report-Msgid-Bugs-To: https://github.com/Vincenzoferrara/mg-warehouse-stock/issues\n"
+"POT-Creation-Date: 2026-09-28 19:37+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"X-Domain: mg-warehouse-stock\n"
+
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2128
+msgid "(All)"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:226
+msgid "+ Site"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2093 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:362
+msgid "-- select --"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:456
+msgid "Accept order"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:406
+#, php-format
+msgid "Accepted <span class=\"count\">(%s)</span>"
+msgid_plural "Accepted <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+msgstr[1] ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1231
+msgid "Allocation is outside your assigned site"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1725
+#, php-format
+msgid "Cannot delete: linked to %d warehouses"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1949
+#, php-format
+msgid "Cannot delete: site is in use (levels=%1$d, movements=%2$d)"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1942
+msgid "Cannot delete: the site still has warehouses"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1733
+#, php-format
+msgid "Cannot delete: used by %d stock levels"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1903
+#, php-format
+msgid "Cannot delete: warehouse is in use (levels=%1$d, movements=%2$d)"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:230
+msgid "Collapse"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:591
+msgid "Copy default to empty"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1467
+msgid "Could not create the site"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1497
+msgid "Could not create the warehouse"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1957
+msgid "Could not delete the site"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1911
+msgid "Could not delete the warehouse"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-rest-api.php:3560
+msgid "Could not record the entry into the destination warehouse"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-rest-api.php:4667
+msgid "Could not record the incoming movement"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-rest-api.php:4655
+msgid "Could not record the outgoing movement"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-rest-api.php:4673
+msgid "Could not record the return"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:3061
+msgid "Could not save the movement"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:2466 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:2826
+msgid "Could not write the stock level"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:502
+msgid "Default location"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:509
+msgid "Default location not set."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:585
+msgid "Default location per variation"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2126
+msgid "Default site"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2058
+msgid "Destination is outside your assigned site"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1740 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1855 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1880 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2009 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2023 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2036 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2066 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2071
+msgid "Error"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:229
+msgid "Expand"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:590
+msgid "Filter variations..."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2055
+msgid "Invalid destination"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1605 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:107
+msgid "Invalid field"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2081
+msgid "Invalid operation"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1033 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1174
+msgid "Invalid order"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1185
+msgid "Invalid payload"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1016 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:960 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:996
+msgid "Invalid product"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:475
+msgid "Invalid product."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:96
+msgid "Invalid rack"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:85
+msgid "Invalid room"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1027 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1168 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1363 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1509 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1772 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1780 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1787 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1796 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1967
+msgid "Invalid security token"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1587 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1703 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1921 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:63
+msgid "Invalid site"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1006
+msgid "Invalid variation"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1890 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1993 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:382
+msgid "Invalid warehouse"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:453
+msgid "Load availability"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:2428 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:2782 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:3016
+msgid "Location is not linked to this warehouse. Link the shelves in WooCommerce → Warehouse."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1850
+msgid "Location not found in the site structure"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:145
+msgid "MG Warehouse Stock needs WooCommerce to be installed and active. Warehouse levels, purchase orders and the point of sale stay unavailable until it is."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:568
+msgid "Manage sites, warehouses and locations"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:220
+msgid "Manage the location tree: Site → Warehouse → Room → Rack → Shelf."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:93
+msgid "Missing context"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1482 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1577 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1695 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1833 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1869 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:443
+msgid "Missing data"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:405
+msgid "Missing rack"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:389
+msgid "Missing room"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:420
+msgid "Missing shelf"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:70
+msgid "Missing value"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:604
+msgid "Name"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:2310
+msgid "No location"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1254
+msgid "Not enough stock for every order line"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-rest-api.php:3555
+msgid "Not enough stock in the source warehouse"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:2829
+msgid "Not enough stock, or no such stock level"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1837
+msgid "Only shelf links are allowed here"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1315
+msgid "Order accepted"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-rest-api.php:4417
+msgid "Order accepted (API)."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1305
+msgid "Order accepted."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1179
+msgid "Order already accepted"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:451
+msgid "Order already accepted."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:503
+msgid "Order: Site → Warehouse → Room → Rack → Shelf. To add or remove locations, go to WooCommerce → Warehouse."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:430
+msgid "Picking / Acceptance"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:621
+msgid "Product"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1355
+msgid "Product #"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:964
+msgid "Product not found"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:574 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:606
+msgid "Purchase cost"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2003
+msgid "Quantity must be 0 or more"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2019 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2032 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2045
+msgid "Quantity must be greater than 0"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:556 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:611
+msgid "Rack"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:88
+msgid "Rack not found"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:224
+msgid "Reload"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:592
+msgid "Reset columns"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:552 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:610
+msgid "Room"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:80
+msgid "Room not found"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:593
+msgid "Save the product to confirm."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:228
+msgid "Search (site, warehouse, room...)"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2048
+msgid "Select a destination warehouse"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1840
+msgid "Select a rack and a shelf"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1613 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1718
+msgid "Select a room and a rack first"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1610 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1715
+msgid "Select a room first"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:586
+msgid "Set Site / Warehouse / Room / Rack / Shelf for each variation. All fields are optional."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:560 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:612
+msgid "Shelf"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2085 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:536 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:608 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-rest-api.php:561
+msgid "Site"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1087 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:538 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:678
+msgid "Site #"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1590 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1706 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1926
+msgid "Site is outside your assigned site"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1457
+msgid "Site name is missing"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2051
+msgid "Source and destination warehouse must be different"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:3039
+msgid "Stock changed or is no longer sufficient, reload and try again"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-rest-api.php:4650
+msgid "Stock ran out or changed during checkout"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2027
+msgid "Stock-in recorded"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2040
+msgid "Stock-out recorded"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1452
+msgid "This user is limited to one site and cannot create new ones"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2078
+msgid "Transfer recorded"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2014
+msgid "Updated"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:607
+msgid "Variation"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1009
+msgid "Variation does not belong to this product"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:205 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:206 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2124 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:219 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:258 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:548 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:609 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-rest-api.php:586
+msgid "Warehouse"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1094
+msgid "Warehouse #"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:2424 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/mgws-db.php:2778
+msgid "Warehouse has no site"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1437 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1846 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1875 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1896 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1996
+msgid "Warehouse is outside your assigned site"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1308 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-rest-api.php:4420
+#, php-format
+msgid "Warning: not enough stock for %d units."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:2134
+msgid "When set, limits the user to a single site."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:574
+msgid "WooCommerce `_purchase_cost` meta, also updated by supplier receipts."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1024 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1165 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1360 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1403 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1426 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1446 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1475 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1506 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1564 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1683 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1769 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1793 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:1964 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:215
+msgid "You do not have permission to do that"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:440
+msgid "You do not have permission to do that."
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:401 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:415 /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:419
+msgctxt "order status"
+msgid "Accepted"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:287
+msgctxt "post type plural name"
+msgid "Sites"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:300
+msgctxt "post type plural name"
+msgid "Warehouses"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:288
+msgctxt "post type singular name"
+msgid "Site"
+msgstr ""
+
+#: /var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php:301
+msgctxt "post type singular name"
+msgid "Warehouse"
+msgstr ""
+

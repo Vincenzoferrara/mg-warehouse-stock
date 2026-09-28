@@ -19,8 +19,8 @@ BOOTSTRAP="$ROOT_DIR/${PLUGIN_SLUG}.php"
 DIST_DIR="$ROOT_DIR/dist"
 STAGE_DIR="$DIST_DIR/stage/${PLUGIN_SLUG}"
 
-# Directories that make up a runtime install. languages/ is conditional: it does
-# not exist until the first translation is generated.
+# Directories that make up a runtime install. languages/ carries the translation
+# template, which WordPress reads to offer the plugin for translation.
 RUNTIME_DIRS=(includes assets languages)
 RUNTIME_FILES=(LICENSE readme.txt uninstall.php)
 

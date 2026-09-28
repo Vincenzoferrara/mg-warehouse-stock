@@ -60,14 +60,14 @@ class MGWS_DB {
     public static function delete_from_site_tree($site_id, $field, $value, $parent_room = '', $parent_rack = '') {
         $site_id = (int) $site_id;
         if ($site_id <= 0) {
-            return array('ok' => false, 'message' => 'Sede non valida');
+            return array('ok' => false, 'message' => __('Invalid site', 'mg-warehouse-stock'));
         }
         $field = sanitize_key((string) $field);
         $value = self::sanitize_loc((string) $value);
         $parent_room = self::sanitize_loc((string) $parent_room);
         $parent_rack = self::sanitize_loc((string) $parent_rack);
         if ($value === '') {
-            return array('ok' => false, 'message' => 'Valore mancante');
+            return array('ok' => false, 'message' => __('Missing value', 'mg-warehouse-stock'));
         }
 
         $tree = self::get_site_location_tree($site_id);
@@ -77,23 +77,23 @@ class MGWS_DB {
 
         if ($field === 'room') {
             if (!isset($tree['rooms'][$value])) {
-                return array('ok' => false, 'message' => 'Stanza non trovata');
+                return array('ok' => false, 'message' => __('Room not found', 'mg-warehouse-stock'));
             }
             unset($tree['rooms'][$value]);
         } elseif ($field === 'rack') {
             if ($parent_room === '' || !isset($tree['rooms'][$parent_room])) {
-                return array('ok' => false, 'message' => 'Stanza non valida');
+                return array('ok' => false, 'message' => __('Invalid room', 'mg-warehouse-stock'));
             }
             if (!isset($tree['rooms'][$parent_room]['racks'][$value])) {
-                return array('ok' => false, 'message' => 'Scaffale non trovato');
+                return array('ok' => false, 'message' => __('Rack not found', 'mg-warehouse-stock'));
             }
             unset($tree['rooms'][$parent_room]['racks'][$value]);
         } elseif ($field === 'shelf') {
             if ($parent_room === '' || $parent_rack === '') {
-                return array('ok' => false, 'message' => 'Contesto mancante');
+                return array('ok' => false, 'message' => __('Missing context', 'mg-warehouse-stock'));
             }
             if (!isset($tree['rooms'][$parent_room]['racks'][$parent_rack]['shelves'])) {
-                return array('ok' => false, 'message' => 'Scaffale non valido');
+                return array('ok' => false, 'message' => __('Invalid rack', 'mg-warehouse-stock'));
             }
             $arr = $tree['rooms'][$parent_room]['racks'][$parent_rack]['shelves'];
             if (!is_array($arr)) {
@@ -104,7 +104,7 @@ class MGWS_DB {
             }));
             $tree['rooms'][$parent_room]['racks'][$parent_rack]['shelves'] = $arr;
         } else {
-            return array('ok' => false, 'message' => 'Campo non valido');
+            return array('ok' => false, 'message' => __('Invalid field', 'mg-warehouse-stock'));
         }
 
         $tree = self::normalize_location_tree($tree);
@@ -379,14 +379,14 @@ class MGWS_DB {
     public static function link_location_to_warehouse($warehouse_id, $room, $rack, $shelf, $scope) {
         $warehouse_id = (int) $warehouse_id;
         if ($warehouse_id <= 0) {
-            return array('ok' => false, 'message' => 'Magazzino non valido');
+            return array('ok' => false, 'message' => __('Invalid warehouse', 'mg-warehouse-stock'));
         }
         $room = self::sanitize_loc((string) $room);
         $rack = self::sanitize_loc((string) $rack);
         $shelf = self::sanitize_loc((string) $shelf);
         $scope = sanitize_key((string) $scope);
         if ($room === '') {
-            return array('ok' => false, 'message' => 'Stanza mancante');
+            return array('ok' => false, 'message' => __('Missing room', 'mg-warehouse-stock'));
         }
 
         $tree = self::get_warehouse_location_tree($warehouse_id);
@@ -402,7 +402,7 @@ class MGWS_DB {
         }
 
         if ($rack === '') {
-            return array('ok' => false, 'message' => 'Scaffale mancante');
+            return array('ok' => false, 'message' => __('Missing rack', 'mg-warehouse-stock'));
         }
         if (!isset($tree['rooms'][$room]['racks'][$rack])) {
             $tree['rooms'][$room]['racks'][$rack] = array('all' => 0, 'shelves' => array());
@@ -417,7 +417,7 @@ class MGWS_DB {
         }
 
         if ($shelf === '') {
-            return array('ok' => false, 'message' => 'Mensola mancante');
+            return array('ok' => false, 'message' => __('Missing shelf', 'mg-warehouse-stock'));
         }
         $tree['rooms'][$room]['all'] = 0;
         $tree['rooms'][$room]['racks'][$rack]['all'] = 0;
@@ -440,7 +440,7 @@ class MGWS_DB {
         $shelf = self::sanitize_loc((string) $shelf);
         $scope = sanitize_key((string) $scope);
         if ($warehouse_id <= 0 || $room === '') {
-            return array('ok' => false, 'message' => 'Dati mancanti');
+            return array('ok' => false, 'message' => __('Missing data', 'mg-warehouse-stock'));
         }
         $tree = self::get_warehouse_location_tree($warehouse_id);
         if (!isset($tree['rooms'][$room])) {
@@ -2307,7 +2307,7 @@ class MGWS_DB {
             $parts[] = $shelf;
         }
         if (empty($parts)) {
-            return 'Senza ubicazione';
+            return __('No location', 'mg-warehouse-stock');
         }
         return implode(' / ', $parts);
     }
@@ -2421,11 +2421,11 @@ class MGWS_DB {
 
         $site_id = self::get_site_id_for_warehouse($warehouse_id);
         if ($site_id <= 0) {
-            return array('ok' => false, 'message' => 'Magazzino senza sede');
+            return array('ok' => false, 'message' => __('Warehouse has no site', 'mg-warehouse-stock'));
         }
 
         if (!self::warehouse_allows_location($warehouse_id, $room, $rack, $shelf)) {
-            return array('ok' => false, 'message' => 'Ubicazione non collegata al magazzino. Collega le mensole in WooCommerce -> Magazzino');
+            return array('ok' => false, 'message' => __('Location is not linked to this warehouse. Link the shelves in WooCommerce → Warehouse.', 'mg-warehouse-stock'));
         }
 
         $now = gmdate('Y-m-d H:i:s');
@@ -2463,7 +2463,7 @@ class MGWS_DB {
             'updated_at_gmt' => $now,
         ));
         if (!$inserted) {
-            return array('ok' => false, 'message' => 'Errore inserimento livello');
+            return array('ok' => false, 'message' => __('Could not write the stock level', 'mg-warehouse-stock'));
         }
         return array('ok' => true, 'old_qty' => 0, 'new_qty' => $qty, 'site_id' => $site_id);
     }
@@ -2775,11 +2775,11 @@ class MGWS_DB {
 
         $site_id = self::get_site_id_for_warehouse($warehouse_id);
         if ($site_id <= 0) {
-            return array('ok' => false, 'message' => 'Magazzino senza sede');
+            return array('ok' => false, 'message' => __('Warehouse has no site', 'mg-warehouse-stock'));
         }
 
         if (!self::warehouse_allows_location($warehouse_id, $room, $rack, $shelf)) {
-            return array('ok' => false, 'message' => 'Ubicazione non collegata al magazzino. Collega le mensole in WooCommerce -> Magazzino');
+            return array('ok' => false, 'message' => __('Location is not linked to this warehouse. Link the shelves in WooCommerce → Warehouse.', 'mg-warehouse-stock'));
         }
 
         $now = gmdate('Y-m-d H:i:s');
@@ -2823,10 +2823,10 @@ class MGWS_DB {
             if ($inserted) {
                 return array('ok' => true, 'site_id' => $site_id, 'new_qty' => $delta_qty);
             }
-            return array('ok' => false, 'message' => 'Errore inserimento livello');
+            return array('ok' => false, 'message' => __('Could not write the stock level', 'mg-warehouse-stock'));
         }
 
-        return array('ok' => false, 'message' => 'Stock insufficiente o livello inesistente');
+        return array('ok' => false, 'message' => __('Not enough stock, or no such stock level', 'mg-warehouse-stock'));
     }
 
     public static function get_moves($filters = array(), $limit = 200) {
@@ -3013,7 +3013,7 @@ class MGWS_DB {
 
             if (!self::warehouse_allows_location($warehouse_id, $room, $rack, $shelf)) {
                 $wpdb->query('ROLLBACK');
-                return array('ok' => false, 'message' => 'Ubicazione non collegata al magazzino. Collega le mensole in WooCommerce -> Magazzino');
+                return array('ok' => false, 'message' => __('Location is not linked to this warehouse. Link the shelves in WooCommerce → Warehouse.', 'mg-warehouse-stock'));
             }
 
             $updated = $wpdb->query($wpdb->prepare(
@@ -3036,7 +3036,7 @@ class MGWS_DB {
 
             if ((int) $updated !== 1) {
                 $wpdb->query('ROLLBACK');
-                return array('ok' => false, 'message' => 'Stock cambiato o insufficiente, ricarica e riprova');
+                return array('ok' => false, 'message' => __('Stock changed or is no longer sufficient, reload and try again', 'mg-warehouse-stock'));
             }
 
             $inserted = $wpdb->insert($moves, array(
@@ -3058,7 +3058,7 @@ class MGWS_DB {
             ));
             if (!$inserted) {
                 $wpdb->query('ROLLBACK');
-                return array('ok' => false, 'message' => 'Errore salvataggio movimento');
+                return array('ok' => false, 'message' => __('Could not save the movement', 'mg-warehouse-stock'));
             }
         }
         $wpdb->query('COMMIT');
