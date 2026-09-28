@@ -52,6 +52,42 @@ tabella", e solo un elenco indipendente può farlo.
 - **Nessun job cron e nessun transient** del plugin: l'inventario di `uninstall.php` è
   completo con 18 tabelle, 3 option, 2 CPT, 7 capability, 1 user meta.
 
+## Ruling del Task 2
+
+**R5 — La dichiarazione HPOS sta a scope di file, non nel costruttore.** Il piano la
+metteva in `MGWS_Plugin::__construct()`. Con `Requires Plugins: woocommerce` WordPress
+carica WooCommerce **prima** di questo plugin, quindi `before_woocommerce_init` scatta
+mentre Woo gestisce `plugins_loaded`, prima che il singleton venga costruito: la
+dichiarazione sarebbe arrivata in ritardo e senza effetto. *Costo se sbagliato:* WooCommerce
+segnala il plugin incompatibile con HPOS.
+
+**R6 — `Tested up to: 7.1`.** Il piano affermava che 7.1 non fosse una versione
+rilasciata stabilmente e prescriveva di non dichiararla. Era sbagliato:
+`api.wordpress.org/core/version-check` riporta 7.1.2 come corrente e il container gira
+7.1. Dichiararla è vero. La voce di `todo.md` che chiedeva la verifica su una versione
+rilasciata si chiude.
+
+**R7 — `readme.txt` non ha ancora la sezione `== Screenshots ==`.** Il piano la chiedeva
+già in F2, ma elencare screenshot che non esistono fa comparire immagini mancanti nella
+scheda. La sezione arriva nel Task 7, con le immagini vere.
+
+**R8 — Le route sono 34 sotto `mgws/v1` e 5 sotto `mgws`, non 39 sotto `mgws/v1`.**
+Verificato con `grep` su `register_rest_route`. Le 5 sotto il namespace breve sono
+`/health`, `/stock/levels`, `/stock/move`, `/orders/{id}/accept` e
+`/resolve/barcode/{code}`. La readme riporta la ripartizione reale.
+
+**R9 — L'opzione `mgws_woocommerce_stock_authority` non ha una casella nella pagina
+impostazioni.** Il plugin non ha un'infrastruttura di impostazioni: ha una sola
+sotto-pagina di WooCommerce. Costruirne una è scope da decidere a parte, non una riga
+aggiuntiva. L'opzione si imposta con `update_option()` ed è documentata in
+`readme.txt`; il comportamento invasivo, che era il problema, è risolto dal default
+off. *Costo se sbagliato:* un gestionale non tecnico non trova il toggle da solo, e la
+funzionalità resta scoperta finché non si aggiunge la UI.
+
+**R10 — Il filtro non ha un `apply_filters` di escape hatch.** Solo `get_option`. Una
+decisione in più da mantenere non serve a nessuno dei due lettori previsti, e nessun
+test la coprirebbe.
+
 ## Bug trovati nei miei stessi test (corretti prima di dichiarare verde)
 
 1. La probe non chiamava mai `mgws_uninstall_all()`. In WordPress è `uninstall_plugin()`
@@ -68,8 +104,8 @@ tabella", e solo un elenco indipendente può farlo.
 
 | Task | Stato | Commit |
 | --- | --- | --- |
-| 1 — `uninstall.php` con test | fatto | vedi sotto |
-| 2 — header, GPL, `readme.txt`, Woo | da fare | |
+| 1 — `uninstall.php` con test | fatto | `6c6062e` |
+| 2 — header, GPL, `readme.txt`, Woo | fatto | vedi sotto |
 | 3 — build zip e CI | da fare | |
 | 4 — i18n PHP | da fare | |
 | 5 — i18n script admin | da fare | |

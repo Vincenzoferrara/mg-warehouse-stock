@@ -2211,6 +2211,42 @@ function mgws_contract_tests(MGWS_REST_API $api): array {
             },
         ),
         array(
+            'name' => 'woocommerce_stock_authority',
+            'description' => 'WooCommerce stock reduction is left alone unless the store explicitly makes MGWS its single stock authority',
+            'run' => static function (): void {
+                $option = MGWS_Plugin::OPTION_WOOCOMMERCE_STOCK_AUTHORITY;
+                unset($GLOBALS['mgws_test_options'][$option]);
+
+                mgws_contract_assert(
+                    MGWS_Plugin::filter_can_reduce_order_stock(true, null) === true,
+                    'a fresh install must leave WooCommerce stock reduction enabled: suppressing it site-wide breaks every other stock plugin'
+                );
+                mgws_contract_assert(
+                    MGWS_Plugin::filter_can_reduce_order_stock(false, null) === false,
+                    'the filter must not force reduction on when something upstream already refused it'
+                );
+
+                $GLOBALS['mgws_test_options'][$option] = '1';
+                mgws_contract_assert(
+                    MGWS_Plugin::filter_can_reduce_order_stock(true, null) === false,
+                    'opting in must suppress WooCommerce stock reduction so stock is not decremented twice'
+                );
+
+                $GLOBALS['mgws_test_options'][$option] = '0';
+                mgws_contract_assert(
+                    MGWS_Plugin::filter_can_reduce_order_stock(true, null) === true,
+                    'opting back out must restore WooCommerce stock reduction'
+                );
+                unset($GLOBALS['mgws_test_options'][$option]);
+
+                $source = (string) file_get_contents(dirname(__DIR__) . '/includes/class-mgws-plugin.php');
+                mgws_contract_assert(
+                    !str_contains($source, "'woocommerce_can_reduce_order_stock', '__return_false'"),
+                    'the site-wide __return_false on WooCommerce stock reduction must not come back'
+                );
+            },
+        ),
+        array(
             'name' => 'invalid_payloads',
             'description' => 'actual POS checkout rejects malformed items before WooCommerce is invoked',
             'run' => static function () use ($api): void {

@@ -13,6 +13,16 @@ class MGWS_Plugin {
     private const DB_SCHEMA_VERSION_OPTION = 'mgws_db_schema_version';
     private const DB_SCHEMA_VERSION = '10';
 
+    /**
+     * When enabled, MGWS is the single source of truth for stock and
+     * WooCommerce is not allowed to decrement it a second time.
+     *
+     * Off by default. The filter it controls is order-wide, so refusing it
+     * disables stock reduction for every item in the order and for every other
+     * plugin on the site. A store that wants MGWS authoritative turns this on.
+     */
+    public const OPTION_WOOCOMMERCE_STOCK_AUTHORITY = 'mgws_woocommerce_stock_authority';
+
     public static function instance() {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -39,10 +49,12 @@ class MGWS_Plugin {
         add_action('init', array($this, 'register_order_status'));
         add_filter('wc_order_statuses', array($this, 'add_order_status_to_list'));
 
-        // Avoid Woo double stock reduction. Stock is managed by this plugin.
-        add_filter('woocommerce_can_reduce_order_stock', '__return_false', 10, 2);
+        // Avoid Woo double stock reduction, but only for stores that made MGWS
+        // their stock authority. See filter_can_reduce_order_stock().
+        add_filter('woocommerce_can_reduce_order_stock', array(__CLASS__, 'filter_can_reduce_order_stock'), 10, 2);
 
         add_action('add_meta_boxes', array($this, 'add_order_metabox'));
+        add_action('admin_notices', array($this, 'notice_woocommerce_missing'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
         add_action('admin_menu', array($this, 'register_admin_pages'));
 
@@ -96,6 +108,45 @@ class MGWS_Plugin {
         }
         MGWS_DB::create_or_update_tables();
         update_option(self::DB_SCHEMA_VERSION_OPTION, self::DB_SCHEMA_VERSION);
+    }
+
+    /**
+     * Decides whether WooCommerce may decrement stock for an order.
+     *
+     * WooCommerce asks this once per order, not once per item, so a `false`
+     * here stops stock reduction for the whole order. That is what MGWS needs
+     * when it owns the stock ledger, and what it must not impose on a store
+     * that has not asked for it.
+     *
+     * @param bool       $reduce Whether WooCommerce wants to reduce stock.
+     * @param mixed|null $order  The order, unused: the decision is store-wide.
+     * @return bool
+     */
+    public static function filter_can_reduce_order_stock(bool $reduce, mixed $order = null): bool {
+        if ('1' === (string) get_option(self::OPTION_WOOCOMMERCE_STOCK_AUTHORITY, '0')) {
+            return false;
+        }
+        return $reduce;
+    }
+
+    /**
+     * Tells the administrator that the plugin cannot do anything useful without
+     * WooCommerce. An admin notice rather than a wp_die: the point is to explain,
+     * not to lock anyone out of their own dashboard.
+     *
+     * @return void
+     */
+    public function notice_woocommerce_missing(): void {
+        if (class_exists('WooCommerce')) {
+            return;
+        }
+
+        echo '<div class="notice notice-error"><p>';
+        echo esc_html__(
+            'MG Warehouse Stock needs WooCommerce to be installed and active. Warehouse levels, purchase orders and the point of sale stay unavailable until it is.',
+            'mg-warehouse-stock'
+        );
+        echo '</p></div>';
     }
 
     private static function custom_caps() {
