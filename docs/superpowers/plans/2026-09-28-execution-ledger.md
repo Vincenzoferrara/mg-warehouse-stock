@@ -88,6 +88,29 @@ funzionalità resta scoperta finché non si aggiunge la UI.
 decisione in più da mantenere non serve a nessuno dei due lettori previsti, e nessun
 test la coprirebbe.
 
+## Ruling del Task 3
+
+**R11 — `build-release.sh` copia un elenco esplicito e poi verifica, non "esclude
+qualcosa".** Escludere è fragile: basta aggiungere una directory nuova e il pattern di
+esclusione la lascia passare. Lo script copia `includes/`, `assets/`, `languages/`,
+`LICENSE`, `readme.txt` e `uninstall.php`, poi controlla che nessuno dei percorsi vietati
+sia arrivato nella staging **e** nella zip finita. La stessa lista serve per le due fasi.
+
+**R12 — Lo `Stable tag` di `readme.txt` viene confrontato con la versione del plugin.**
+Sono la stessa promessa detta due volte, in due file che nessun test mette in relazione.
+Il build fallisce se divergono. Verificato: alterare lo `Stable tag` a 2.2.9 fa uscire
+con codice 1.
+
+**R13 — La CI linta la produzione, non i test, sulla matrice 8.0-8.3.** I test usano
+sintassi che il minimo dichiarato non garantisce, e la matrice serve a presidiare il
+contronto con `Requires PHP: 8.0`, che è rivolto agli utenti. I test girano una volta sola
+su 8.3. Verificato che in produzione non c'è sintassi 8.1+ (`readonly`, `enum`, `never`,
+first-class callable): l'unico match di `\.\.\.)` è `stanza...)` dentro una stringa.
+
+**R14 — Lo step di lint usa `lint_status`, non `status`.** `status` è una variabile
+read-only in zsh: chi copia lo step in una shell zsh ottiene un errore invece di un
+risultato. Il nome è una difesa, non una preferenza di stile.
+
 ## Bug trovati nei miei stessi test (corretti prima di dichiarare verde)
 
 1. La probe non chiamava mai `mgws_uninstall_all()`. In WordPress è `uninstall_plugin()`
@@ -106,7 +129,7 @@ test la coprirebbe.
 | --- | --- | --- |
 | 1 — `uninstall.php` con test | fatto | `6c6062e` |
 | 2 — header, GPL, `readme.txt`, Woo | fatto | vedi sotto |
-| 3 — build zip e CI | da fare | |
+| 3 — build zip e CI | fatto | vedi sotto |
 | 4 — i18n PHP | da fare | |
 | 5 — i18n script admin | da fare | |
 | 6 — copertura sicurezza in CI | da fare | |
