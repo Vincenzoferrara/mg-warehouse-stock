@@ -515,6 +515,25 @@ screenshot i default delle variazioni con location e purchase cost, che è il ma
 disponibile e pertinente. Costo se sbagliato: scheda meno rappresentativa del modulo acquisti;
 runtime invariato.
 
+## Final review
+
+Final review: self-review, perché il dispatch del reviewer fresh-context via tool `subagent`
+ha fallito più volte: il wrapper continuava a inviare l'ID della sessione corrente come
+`sessionID`, e il backend lo rifiutava con `Session ... is not a child of the current session`.
+Ho quindi eseguito una review separata sul diff `main...HEAD`, con focus su uninstall,
+WordPress.org packaging, i18n, stabilità del contratto REST, security coverage e fix HPOS.
+
+Esito: nessun finding Critical o Important.
+
+Final: minor (deferred): gli screenshot sono tracciati in `assets/screenshots/` per il repo e
+la zip, ma nella submission SVN di WordPress.org vanno copiati nella directory top-level
+`/assets` del repository SVN della directory.
+
+Final: minor (deferred): il validator ufficiale online è stato chiamato ma non ha restituito un
+risultato parseabile da CLI senza il flusso web/nonce; restano verificati localmente i campi
+concreti del readme (header, short description sotto 150 caratteri, 5 tag, stable tag, sezione
+screenshot e file screenshot presenti).
+
 ## Stato dei task
 
 | Task | Stato | Commit |
