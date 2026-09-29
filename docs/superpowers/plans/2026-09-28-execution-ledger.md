@@ -349,6 +349,127 @@ msgfmt -o /dev/null                                   compila
    Oggi il driver controlla esplicitamente l'output dello script (`strings,` presente,
    zero riferimenti al file di mutazione) invece di dedurre la riuscita dal codice di uscita.
 
+## Ruling del Task 6 (copertura di sicurezza)
+
+Il piano chiedeva 4 controlli. Ne ho scritti 5, perché il quarto del piano — la verifica
+JavaScript — si è rivelato quasi inerte, e un controllo che passa sempre non è un controllo.
+
+### R39 — Il piano conta 16 handler AJAX, sono 15
+
+`add_action('wp_ajax_` conta 15 volte in `includes/class-mgws-plugin.php` (righe 61-79).
+Il piano ne dichiarava 16. Stesso genere di errore di R8: un numero contato a mano e poi
+usato come criterio. Il test non ha un numero atteso scritto dentro: conta quello che trova
+e pretende che ogni handler sia coperto, così il numero non può sbagliarsi.
+
+### R40 — Il controllo JavaScript del piano era un quasi no-op
+
+Il piano proponeva di vietare `.html()` con un operando che non sia una letterale, **limitato
+agli argomenti letterali**. Su questi file 21 chiamate `.html()`, 9 con argomento letterale:
+12 casi reali non erano guardati, e dei 9 guardati la forma più comune è `.html(escaped)`.
+Verificato prima di buttare via la proposta.
+
+### R41 — La verifica è stata riscritta come scanner di token con provenienza
+
+`mgws_sec_js_scan()` trasforma il file in token (letterali, numeri, regex, parole, punteggiatura)
+e `mgws_sec_js_unescaped()` cammina le concatenazioni i cui letterali contengono `<`.
+Un operando è accettato solo con una ragione esplicita:
+
+- letterale o numero;
+- chiamata a `esc` o a `wp.i18n.*`, che restituisce una stringa del catalogo del plugin;
+- chiamata a una funzione **definita nello stesso file**, che lo stesso passaggio regge con
+  la stessa regola;
+- identificatore nudo la cui **provenienza** è nota: `numeric` se ogni assegnazione
+  nell'ambito è un numero, `constant` se ogni foglia è una letterale scritta nella sorgente
+  (il caso `ok ? 'mgws-ok' : 'mgws-err'`).
+
+Misura reale: **105 sink di markup, 343 operandi esaminati**. Non è una stima.
+
+### R42 — `esc()` contiene `/\"/g`, e uno scanner di regex deve saperlo
+
+Il primo scanner leggeva `/` come divisione e si disfaceva: in `esc()` c'è `replace(/\"/g, ...)`.
+Da lì la necessità di riconoscere i letterali regex, altrimenti la slash viene presa per un
+operatore e i 242 caratteri successivi diventano rumore. Le regex sono un token, non una
+divisione, quando ciò che le precede non chiude un'espressione.
+
+### R43 — I letterali e i numeri erano operandi di lunghezza zero
+
+`mgws_sec_js_value_end()` gestiva solo i nomi puntati (`s.name`) e le chiamate. Per un
+letterale o un numero restituiva `$start` invece di `$start + 1`: lo span era **vuoto** e il
+cammino delle concatenazioni si chiudeva dopo il primo operando. Il conteggio diceva
+*105 sink, 181 operandi, uno ciascuno*. Il check non segnalava niente perché non guardava
+mai il secondo operando: due terzi della copertura dichiarata non esistevano.
+**Correzione: 105 sink, 343 operandi.**
+
+### R44 — Le route REST: definizione inline o costruita altrove, due regole diverse
+
+`register_rest_route` compare 39 volte: 38 con la definizione degli endpoint scritta inline,
+1 dentro un ciclo. Con la regola originaria — se manca la chiave, cerca nel metodo che
+contiene la chiamata — **rimuovere `permission_callback` da `/stock/levels` non faceva
+fallire nulla**, perché le 37 route sorelle dello stesso metodo ce l'avevano. Il fallback
+giustificava la route che aveva perso la protezione.
+
+La regola giusta è determinabile: si separa il terzo argomento a profondità zero
+(`mgws_sec_top_level_args`) e se comincia con `array(` o `[` la definizione è inline e la
+chiave deve stare lì; altrimenti arriva da una variabile e la chiave va cercata nel metodo
+che la costruisce. Separazione netta: 38 letterali con la chiave, 1 espressione senza.
+
+### R45 — La provenienza è un fatto locale, non di file
+
+`admin-masterdata.js` ha un `cls` che è `ok ? 'mgws-ok' : 'mgws-err'` dentro `setMsg`, e un
+`cls` non correlato che vale `String($d.attr('class'))` 800 righe più in giù. Leggendo tutto il
+file, il secondo annullava il primo e il nome della classe del banner risultava non escapato.
+Da qui `mgws_sec_js_function_scopes()` e la provenienza ristretta alla funzione che contiene
+l'uso. Il range parte dalla parola chiave `function`, non dalla graffa: `each(function (idx)`
+dichiara `idx` **prima** della graffa, e un range che comincia dalla graffa non vede la callback
+che lo rende un indice.
+
+### R46 — `jQuery.each` passa l'indice per primo, `Array.forEach` per secondo
+
+Tenere insieme i due faceva sbagliare in entrambe le direzioni. `MGWS_SEC_JS_ITERATORS` è
+una mappa nome → posizione dell'indice, non una lista.
+
+### R47 — Una chiamata non è un numero
+
+Saltare una chiamata intera rendeva numerico qualunque cosa: `String($d.attr('class'))` e un
+ipotetico `var x = fetchLabel()` passavano entrambi, e il secondo è esattamente il buco che
+il check esiste per trovare. Ora si saltano solo le conversioni (`parseInt`, `parseFloat`,
+`Number`) e il namespace `Math`. Nota: `Math` va riconosciuto come **ricevitore**, non come
+callee — nell'ultimo anello della catena c'è `max`, non `Math`.
+
+### R48 — Una parentesi non è una chiamata
+
+Con lo span che ora consuma la lista di argomenti, il token dopo lo span non è più `(`.
+Guardare lì diceva "ogni chiamata è una variabile nuda". E uno span che **apre** con `(` è
+un'espressione parentesizzata: senza questa distinzione `(idx + 1)` e
+`(roomAll ? ' (all)' : '')` finivano su un ramo che nessun identificatore può soddisfare.
+
+### R49 — La punteggiatura andava letta un carattere alla volta
+
+`===` diventava tre token `=`, `||` due token `|`, `>=` due token. Da lì due guasti insieme:
+`totalsRequired === 0` veniva letto come un'assegnazione a `totalsRequired` con valore `= = 0`,
+e `parseInt(...) || 0` non risultava numerico. Le assegnazioni di `totalsRequired` erano due,
+una buona e una fasulla, e la provenienza si annullava da sola. Le operazioni multi-carattere
+si riconoscono ora per corrispondenza greedy dalla lista più lunga.
+
+### Mutation testing: 16 mutazioni, 16 intercettate
+
+Il banco (`/tmp/opencode/secmut.py`, `secmut_cases.py`) applica una sostituzione letterale e
+pretende che il check indicato diventi rosso. **16/16**, inclusa la rimozione di
+`permission_callback` dalla route in ciclo e la rimozione di `esc()` da due renderer reali.
+
+Una regressione è **fuori perimetro** e resta dichiarata, non nascosta:
+`$el.html(userInput)` non costruisce nessuna concatenazione, quindi non c'è markup da
+guardare. Il limite è scritto nel docblock del check.
+
+### Il mio primo banco di mutazioni era la parte inaffidabile
+
+Prima versione: sostituzione con `sed` via quoting annidato, che sostituiva `'` con `.` per
+aggirare le virgolette e finiva per iniettare JS e PHP sintatticamente invalidi. Risultato:
+2 casi intercettati su 13, e la diagnosi naturale — "il test è debole" — era quella sbagliata.
+Riscritto in Python con sostituzione letterale e i file passati al container via `tar`/stdin.
+È la **terza** volta in questo lavoro che un controllo testuale mio era il pezzo debole:
+R4 (censimento dei messaggi REST), R5 (text domain con `_x`), e qui.
+
 ## Stato dei task
 
 | Task | Stato | Commit |
@@ -357,8 +478,8 @@ msgfmt -o /dev/null                                   compila
 | 2 — header, GPL, `readme.txt`, Woo | fatto | `9e9a304` |
 | 3 — build zip e CI | fatto | `4cd5c58` |
 | 4 — i18n PHP e `.pot` | fatto | `936a4a9` |
-| 5 — i18n script admin | fatto | vedi sotto |
-| 6 — copertura sicurezza in CI | da fare | |
+| 5 — i18n script admin | fatto | `6e15dd3` |
+| 6 — copertura sicurezza in CI | fatto | da committare |
 | 7 — verifica di submission | da fare | |
 
 ## Baseline (da ristabilire dopo ogni task)
@@ -369,9 +490,13 @@ node --check                                            4 file, nessun errore
 tests/mgws_contract_test.php                            SUMMARY failures=0 pending=0   (37 gruppi)
 tests/assert_mgws_contract_matrix.php                   50 required rows verified
 tests/uninstall_test.php                                SUMMARY failures=0             (6 casi)
+tests/security_coverage_test.php                        SUMMARY failures=0             (5 check)
 bin/make-pot.php --check                                is up to date (210 strings, 9 files)
 bin/build-release.sh                                    20 files, 2.3.0
 ```
+
+Copertura della verifica JavaScript del Task 6: 105 sink di markup, 343 operandi.
+Mutation test: 16 mutazioni in perimetro, 16 intercettate, 1 fuori perimetro dichiarata.
 
 ## Cosa non è stato verificato
 
@@ -382,6 +507,11 @@ bin/build-release.sh                                    20 files, 2.3.0
   (`msgcat`). Il passaggio runtime resta non provato qui.
 - **`msgunfmt` su un `.mo` vuoto** restituisce 0 msgid: non è un difetto, è che un `.mo`
   senza traduzioni non contiene stringhe. Serve il test di cui sopra per chiuderlo.
+- **I sink che non costruiscono markup.** `$el.html(userInput)` passa il check del Task 6:
+  non c'è concatenazione, quindi non c'è operando da guardare. Coprirlo richiede il valore di
+  un identificatore, non la forma di una concatenazione, e `admin-order.js:93` mostra perché è
+  più difficile di quanto sembri: `txt` viene riassegnato a `esc(txt)` alla riga 91 e usato
+  alla 93, quindi serve ragionare sul flusso e non su "qualunque assegnazione".
 
 ## Questioni aperte (decidere prima del Task 7)
 
