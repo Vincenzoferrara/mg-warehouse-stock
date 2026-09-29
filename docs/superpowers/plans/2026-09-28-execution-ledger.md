@@ -470,6 +470,51 @@ Riscritto in Python con sostituzione letterale e i file passati al container via
 È la **terza** volta in questo lavoro che un controllo testuale mio era il pezzo debole:
 R4 (censimento dei messaggi REST), R5 (text domain con `_x`), e qui.
 
+## Ruling del Task 7 (submission)
+
+### R50 — Nome visualizzato descrittivo, slug invariato
+
+`MG Warehouse Stock` non spiega il valore del plugin nella directory. Ho scelto
+`Warehouse Stock Manager for WooCommerce` come nome visualizzato in header e `readme.txt`,
+lasciando invariati slug, Text Domain, file `.pot`, mount Docker e contratto dell'app. Costo se
+sbagliato: marketing/posizionamento, non compatibilità tecnica; si può cambiare prima della
+submission senza migrazioni.
+
+### R51 — `assets/screenshots/` seguito come path del piano, non come layout SVN finale
+
+La documentazione WordPress.org dice che gli asset della pagina vivono nella directory SVN
+top-level `/assets`, non dentro il plugin runtime. Il piano però chiede `assets/screenshots/` in
+questo repo e `bin/build-release.sh` spedisce `assets/` come directory runtime. Ho seguito il
+piano per produrre materiali tracciati nel repo e nella zip, ma il pacchetto SVN finale dovrà
+copiare questi PNG nella `/assets` SVN della directory. Costo se sbagliato: gli screenshot non
+appaiono nella scheda, non un bug runtime.
+
+### R52 — La verifica screenshot ha scoperto che l'ordine HPOS non mostrava il box MGWS
+
+Aprire `post.php?post=11718&action=edit` redirige a
+`admin.php?page=wc-orders&action=edit&id=11718`, cioè lo schermo ordini HPOS. Il box
+`Picking / Acceptance` non compariva perché `add_meta_box()` era registrato solo su
+`shop_order`, e `enqueue_admin_assets()` caricava `admin-order.js` solo sullo schermo classico.
+La documentazione WooCommerce HPOS prescrive `wc_get_page_screen_id('shop-order')` quando le
+custom order tables sono abilitate e avvisa che la callback può ricevere un `WC_Order` invece di
+un `WP_Post`.
+
+Fix: `add_order_metabox()` ora sceglie lo screen HPOS tramite
+`CustomOrdersTableController`, `render_order_metabox()` accetta sia `WP_Post` sia oggetti con
+`get_id()`, e gli asset ordine si caricano anche su `page=wc-orders&action=edit`. Il test
+`hpos_order_admin_screen_is_supported` è stato aggiunto a `tests/security_coverage_test.php`:
+RED prima del fix, GREEN dopo. Costo se sbagliato: il plugin dichiarerebbe HPOS compatibility ma
+perderebbe il flusso principale di accettazione ordini proprio nello schermo HPOS.
+
+### R53 — Screenshot 4 usa i default variazioni invece del pannello acquisti
+
+Nel plugin WordPress c'è una sola pagina admin propria (`WooCommerce → Warehouse`), più pannelli
+su prodotto e ordine. Il piano chiedeva un pannello riordino/acquisti, ma non esiste una pagina
+admin dedicata: riordini/acquisti sono soprattutto REST/API e campi prodotto. Ho usato come quarto
+screenshot i default delle variazioni con location e purchase cost, che è il materiale UI reale
+disponibile e pertinente. Costo se sbagliato: scheda meno rappresentativa del modulo acquisti;
+runtime invariato.
+
 ## Stato dei task
 
 | Task | Stato | Commit |
@@ -480,7 +525,7 @@ R4 (censimento dei messaggi REST), R5 (text domain con `_x`), e qui.
 | 4 — i18n PHP e `.pot` | fatto | `936a4a9` |
 | 5 — i18n script admin | fatto | `6e15dd3` |
 | 6 — copertura sicurezza in CI | fatto | `b3931c4` |
-| 7 — verifica di submission | da fare | |
+| 7 — verifica di submission | fatto | `8bfe8fc` |
 
 ## Baseline (da ristabilire dopo ogni task)
 
@@ -490,9 +535,9 @@ node --check                                            4 file, nessun errore
 tests/mgws_contract_test.php                            SUMMARY failures=0 pending=0   (37 gruppi)
 tests/assert_mgws_contract_matrix.php                   50 required rows verified
 tests/uninstall_test.php                                SUMMARY failures=0             (6 casi)
-tests/security_coverage_test.php                        SUMMARY failures=0             (5 check)
-bin/make-pot.php --check                                is up to date (210 strings, 9 files)
-bin/build-release.sh                                    20 files, 2.3.0
+tests/security_coverage_test.php                        SUMMARY failures=0             (6 check)
+bin/make-pot.php --check                                is up to date (211 strings, 9 files)
+bin/build-release.sh                                    25 files, 2.3.0
 ```
 
 Copertura della verifica JavaScript del Task 6: 105 sink di markup, 343 operandi.

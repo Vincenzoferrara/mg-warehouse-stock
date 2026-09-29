@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name: MG Warehouse Stock
- * Description: Multi-site / multi-warehouse stock levels with room/rack/shelf picking and Woo order status "Accettato".
+ * Plugin Name: Warehouse Stock Manager for WooCommerce
+ * Description: Multi-site and multi-warehouse stock, picking, movement ledger, purchase orders and inventory counts for WooCommerce.
  * Version: 2.3.0
  * Author: MG
  * Text Domain: mg-warehouse-stock

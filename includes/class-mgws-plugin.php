@@ -425,24 +425,57 @@ class MGWS_Plugin {
         if (!class_exists('WooCommerce')) {
             return;
         }
+
+        $screen = 'shop_order';
+        if (class_exists(\Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController::class)
+            && function_exists('wc_get_container')
+            && function_exists('wc_get_page_screen_id')) {
+            try {
+                $controller = wc_get_container()->get(\Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController::class);
+                if (method_exists($controller, 'custom_orders_table_usage_is_enabled')
+                    && $controller->custom_orders_table_usage_is_enabled()) {
+                    $screen = wc_get_page_screen_id('shop-order');
+                }
+            } catch (\Throwable $error) {
+                $screen = 'shop_order';
+            }
+        }
+
         add_meta_box(
             'mgws_accept_box',
             __('Picking / Acceptance', 'mg-warehouse-stock'),
             array($this, 'render_order_metabox'),
-            'shop_order',
+            $screen,
             'side',
             'high'
         );
     }
 
-    public function render_order_metabox($post) {
+    public function render_order_metabox($post_or_order) {
         if (!current_user_can('edit_shop_orders')) {
             echo '<p>' . esc_html__('You do not have permission to do that.', 'mg-warehouse-stock') . '</p>';
             return;
         }
 
-        $order_id = (int) $post->ID;
-        $committed = (int) get_post_meta($order_id, '_mgws_accept_committed', true);
+        if ($post_or_order instanceof WP_Post) {
+            $order_id = (int) $post_or_order->ID;
+        } elseif (is_object($post_or_order) && method_exists($post_or_order, 'get_id')) {
+            $order_id = (int) $post_or_order->get_id();
+        } else {
+            $order_id = isset($_GET['id']) ? absint((string) wp_unslash($_GET['id'])) : 0;
+        }
+
+        if ($order_id <= 0) {
+            echo '<p>' . esc_html__('The order could not be loaded.', 'mg-warehouse-stock') . '</p>';
+            return;
+        }
+
+        $order = function_exists('wc_get_order') ? wc_get_order($order_id) : null;
+        if ($order instanceof WC_Order) {
+            $committed = (int) $order->get_meta('_mgws_accept_committed', true);
+        } else {
+            $committed = (int) get_post_meta($order_id, '_mgws_accept_committed', true);
+        }
 
         wp_nonce_field('mgws_accept_nonce', 'mgws_accept_nonce');
 
@@ -769,7 +802,13 @@ class MGWS_Plugin {
         }
 
         // Order metabox assets.
-        $is_order_screen = ($screen->id === 'shop_order') || (($screen->post_type ?? '') === 'shop_order');
+        $hpos_order_screen_id = function_exists('wc_get_page_screen_id')
+            ? wc_get_page_screen_id('shop-order')
+            : 'woocommerce_page_wc-orders';
+        $is_order_screen = ($screen->id === 'shop_order')
+            || ($screen->id === $hpos_order_screen_id)
+            || (($screen->post_type ?? '') === 'shop_order')
+            || (filter_input(INPUT_GET, 'page') === 'wc-orders' && filter_input(INPUT_GET, 'action') === 'edit');
         if ($is_order_screen) {
             wp_enqueue_style(
                 'mgws-admin-order',

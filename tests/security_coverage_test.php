@@ -1267,6 +1267,29 @@ $mgws_sec_tests['rest_routes_have_permission_callback'] = static function (): vo
         . ' (' . $delegated . ' registrate in ciclo)' . PHP_EOL);
 };
 
+$mgws_sec_tests['hpos_order_admin_screen_is_supported'] = static function (): void {
+    $source = mgws_sec_read(MGWS_SEC_PLUGIN_FILE);
+    $required = array(
+        'CustomOrdersTableController::class' => 'detects the HPOS order controller',
+        "wc_get_page_screen_id('shop-order')" => 'registers the metabox on the HPOS order screen',
+        "page') === 'wc-orders'" => 'loads the order script on the HPOS edit screen',
+        'method_exists($post_or_order, \'get_id\')' => 'renders the metabox when Woo passes a WC_Order object',
+    );
+
+    $missing = array();
+    foreach ($required as $needle => $reason) {
+        if (strpos($source, $needle) === false) {
+            $missing[] = $reason;
+        }
+    }
+
+    if ($missing !== array()) {
+        throw new RuntimeException(implode('; ', $missing));
+    }
+
+    fwrite(STDOUT, 'HPOS order admin screen supported' . PHP_EOL);
+};
+
 $mgws_sec_tests['no_innerhtml'] = static function (): void {
     $hits = array();
     $files = mgws_sec_js_files();

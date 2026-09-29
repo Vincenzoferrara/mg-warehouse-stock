@@ -1,6 +1,6 @@
-=== MG Warehouse Stock ===
+=== Warehouse Stock Manager for WooCommerce ===
 Contributors: vincenzoferrara
-Tags: inventory, stock, warehouse, woocommerce, pos, ecommerce, order-management, stock-management, multi-site, reports
+Tags: woocommerce, inventory, stock, warehouse, pos
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
@@ -9,7 +9,7 @@ Stable tag: 2.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Multi-site and multi-warehouse stock for WooCommerce: locations, movement ledger, purchase orders, receiving and count sessions.
+Multi-warehouse stock, shelf picking, movement ledger, purchase orders and inventory counts for WooCommerce.
 
 == Description ==
 
@@ -41,7 +41,7 @@ WooCommerce asks whether it may reduce stock once per **order**, not once per it
 
 1. Upload the `mg-warehouse-stock` folder to `/wp-content/plugins/`, or install the plugin through the Plugins screen.
 2. Activate it. WooCommerce must be installed and active; WordPress will refuse activation otherwise.
-3. Open **WooCommerce → Magazzino** to create your first site and warehouse.
+3. Open **WooCommerce → Warehouse** to create your first site and warehouse.
 4. Set a product's stock. The quantity on the product becomes the total of your location tree, and WooCommerce's own quantity is kept in sync with it.
 
 == Frequently Asked Questions ==
@@ -69,6 +69,13 @@ WordPress runs the uninstall routine, which removes all 18 of its tables, its op
 = Is there a mobile app? =
 
 The plugin exposes 34 REST endpoints under `mgws/v1` for the point of sale, loyalty cards, stock lookups, purchasing and counts, plus 5 short-form endpoints under `mgws`. It is built for a companion mobile or handheld front end.
+
+== Screenshots ==
+
+1. Warehouse location tree with sites, warehouses, rooms, racks and shelves.
+2. Product stock panel with default picking location and purchase cost.
+3. Accepted order screen with availability, picking quantities and totals.
+4. Product variation defaults for location and purchase cost.
 
 == Changelog ==
 
