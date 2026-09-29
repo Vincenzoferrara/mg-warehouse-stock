@@ -525,7 +525,7 @@ runtime invariato.
 | 4 — i18n PHP e `.pot` | fatto | `936a4a9` |
 | 5 — i18n script admin | fatto | `6e15dd3` |
 | 6 — copertura sicurezza in CI | fatto | `b3931c4` |
-| 7 — verifica di submission | fatto | `8bfe8fc` |
+| 7 — verifica di submission | fatto | `e62d59b` |
 
 ## Baseline (da ristabilire dopo ogni task)
 
