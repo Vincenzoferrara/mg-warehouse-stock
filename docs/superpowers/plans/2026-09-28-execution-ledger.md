@@ -189,6 +189,123 @@ i valori degli attributi** (`placeholder`, `title`, `alt`, `aria-label`, `value`
 i letterali già passati in gettext, e poi rivedere l'elenco a mano. *Costo dell'errore:* una
 verifica che dà falso verde è peggio di nessuna verifica.
 
+## Ruling del Task 5 (i18n degli script di amministrazione)
+
+**R26 — `wp-i18n` è dichiarato esplicitamente, anche se il core lo aggiunge da sé.**
+`wp_set_script_translations()` registra le traduzioni e core inserisce `wp-i18n` tra le
+dipendenze in modo idempotente: dichiararlo a mano sembra ridondante. Resta dichiarato nelle
+3 chiamate `wp_enqueue_script`, insieme a `jquery` e agli altri, per due motivi: la
+dipendenza sta dove stanno le altre, e `bin/make-pot.php` deve poter contare le chiamate
+gettext del file senza dover conoscere le regole interne del core. *Alternativa scartata:*
+lasciare che se ne occupi il core, che funziona ma rende la dipendenza invisibile a chi
+legge.
+
+**R27 — `wp_set_script_translations()` per ciascuno dei 3 handle, non una volta sola.**
+`admin-masterdata`, `admin-order` e `admin-product` hanno handle distinti e il dominio
+`mg-warehouse-stock`. Senza la chiamata per handle, le stringhe di quei file resterebbero
+inglesi per sempre anche con un `.mo` installato: il `.pot` le contiene, ma nessuno le cerca.
+
+**R28 — In JavaScript `\xNN` è un code point, in PHP è un byte: i due decodificatori
+divergono di proposito.** `\xE8` dentro una stringa PHP è il singolo byte `0xE8`;
+`"\xE8"` in JS è il code point U+00E8 e va memorizzato come i suoi due byte UTF-8. Il
+decodificatore JS usava `chr()`, che produceva un `0xE8` isolato: **UTF-8 non valido**, che
+`msgfmt` compila senza complaint e che ogni strumento di lettura trasforma in `�`. Il
+risultato era `msgid "Caf\ufffd"` invece di `Cafè`. Corretto con `mb_chr()` nel ramo JS
+**solo**; `literal_value()` PHP continua a usare `chr()` e il commento dice perché, perché
+è il punto in cui un "allineamento"fra i due romperebbe la codifica.
+*Verificato:* 11 casi di decodifica, accento letterale, `\uXXXX`, `\u{...}`, `\xNN` minuscolo
+e maiuscolo, escape ignoto, apostrofo scappato, doppi apici, `\n`, plurale accentato,
+`_x()` con contesto.
+
+**R29 — I riferimenti nel `.pot` erano percorsi assoluti della macchina di build.** Difetto
+presente dal Task 4, non introdotto qui: le References erano
+`/var/www/html/wp-content/plugins/mg-warehouse-stock/includes/class-mgws-plugin.php`. Difetti
+su tre piani: rivela il filesystem di chi ha compilato, non è riproducibile, e **il
+`--check` di CI fallirebbe**, perché la CI gira in `/home/runner/work/...` e produrrebbe
+un file diverso da quello committato. Corretto facendo girare l'estrattore su un percorso
+**relativo al plugin** e passando un `$label` separato a chi legge il file. *Verificato:*
+`--check` esce 0 sia dal path di sviluppo sia da `/tmp/potmut`, un path completamente
+diverso, che con i percorsi assoluti sarebbe fallito.
+
+**R30 — Tre `msgfmt` "duplicate message definition" non erano un difetto del tooling.**
+`__('room')` e il `msgid "room"` di `_n('room','rooms',…)` sono la stessa chiave
+`(msgctxt, msgid)`. La correzione non è un trucco sul generatore: è che
+`Delete %s "%s"?` con uno slot per l'etichetta **non è traducibile**, perché impedisce al
+traduttore di riordinare e di accordare la frase. Sostituito con tre messaggi completi
+(`Delete the room "%s"?`, `...rack "%s"?`, `...shelf "%s"?`). *Perché conta:* la duplicazione
+che `msgfmt` segnalava era il sintomo di un testo scritto male.
+
+**R31 — Il prefisso di `JS_GETTEXT_FUNCTIONS` consumava il nome della funzione.**
+`substr($code, $i, 10)` per `wp.i18n.` consuma esattamente i primi 10 caratteri del nome
+stesso, quindi la tabella cercava `__('Save',` dentro `wp.i18n.__(` e non trovava nulla:
+**0 stringhe JS estratte**, con il totale fermo a 117 mentre il sorgente ne aveva 155.
+Corretto con `strlen('wp.i18n.')`. *Perché è una sentenza e non una nota:* l'unico sintomo
+osservabile era "il totale non cambia", che è indistinguibile da "non ho toccato niente".
+
+**R32 — Le due verifiche sul testo italiano erano insufficienti, e una delle due lo era due
+volte.** La lista di parole ha mancato 8 stringhe (`Salvato`, `Collegato`, `Rimosso`,
+`Rimozione…`, `Eliminazione…`×3, `Eliminato`): sei perché il filtro che scarta gli
+identificatori accettava anche le maiuscole, e due perché le parole mancavano proprio
+dall'elenco. Le prime 7 sono state trovate dalla lista **solo dopo** aver corretto il filtro;
+`Eliminato` è stata trovata **solo** dall'inventario manuale. La prova che chiude il cerchio
+non è la lista: è l'asserzione che **ogni letterale leggibile del JS è un `msgid` del
+catalogo** — 146/146, con esclusione esplicita e motivata dei contratti macchina
+(`data-*-id=`, `Escape`, `change keyup`, selettori CSS, chiavi di `localStorage`).
+*La lista resta, ma come controllo secondario che ordina l'output, non come verdetto.*
+
+**R33 — `admin-order.js` leggeva un numero dal proprio output tradotto.** La riga 217
+estraeva `/Mancano:\s*(\d+)/` dal testo che la pagina si era appena disegnata. Con la
+traduzione, la regex non trova più niente: la funzione di "tempo rimanente" semplicemente
+smetterebbe di calcolare, in silenzio. Sostituita con la lettura dell'attributo
+`data-mgws-remaining`, che è un contratto macchina. *L'attributo non esisteva:* è la
+modifica deliberata. *Costo dell'errore se non trovato:* silenzioso, e nessuna verifica
+basata su testo lo avrebbe visto.
+
+**R34 — Idem per le due `indexOf('Impossibile eliminare')` in `admin-masterdata.js`.**
+Entrambi i lati erano italiani a `6c6062e`. La traduzione del Task 4 li ha resi **permanentemente
+falsi**: `window.alert` era già spento da allora, prima che la riga venisse toccata. Sostituite
+con un confronto sul codice di errore `resp.data.code === 'mgws_not_deletable'`, che è il
+contratto reale. *Nota:* le due regressioni R33 e R34 sono state introdotte da me e sono
+state scoperte solo perché la verifica confrontava i valori letterali prima e dopo, non perché
+fosse rotta qualcosa.
+
+**R35 — Un template literal con `${}` viene rifiutato, non ignorato.**
+`wp.i18n.__(\`Caffè ${x}\`, …)` contiene un msgid che dipende da una variabile: non è
+estratibile, quindi resterebbe inglese senza che nessuno lo noti. Stessa politica di R22 sul
+lato PHP. *Verificato* fra i casi di rifiuto.
+
+**R36 — Lo scheletro `' (%s: %s)'` non poteva restare fuori da `__()`.** Due chiamate
+costruivano la stringa finale con `sprintf` **fuori** dalla funzione gettext, estraendo solo
+`(%s: %s)`: il traduttore riceveva uno scheletro e non poteva riordinare né inflettere. Le
+frasi intere sono state spostate dentro `wp.i18n.__()`. *Stesso principio di R30:* uno slot
+`%s` che contiene un nome di sostantivo non è un punto di innesto, è una trappola.
+
+**R37 — Il sottosistema di modale morto in `admin-product.js` è stato tradotto, non
+cancellato.** È irraggiungibile, ma è codice del plugin: eliminarlo è una decisione di
+manutenzione separata, e un `.pot` che contiene stringhe di codice morto è innocuo, mentre
+una cancellazione fatta durante un task di traduzione è una modifica non richiesta. Nota in
+`readme.txt` aperta, non risolta qui.
+
+**R38 — `'OK'` in un pulsante diventa `__('Done')`.** `'OK'` è l'etichetta grezza di un
+`alert()` di conferma: in inglese non dice nulla e in italiano era comunque invariato. Il
+contratto (`mgws_*` codici, chiavi di `localStorage`, valori di `KeyboardEvent.key`) è
+rimasto intatto: sono nomi, non testo.
+
+### Cosa è stato verificato sul Task 5
+
+```
+wp.i18n. in admin-masterdata.js                       120 chiamate (108 traducibili, 6 _n, 12 sprintf)
+wp.i18n. in admin-order.js                            23 chiamate traducibili
+wp.i18n. in admin-product.js                          24 chiamate traducibili
+parità estrazione → .pot                              108/108   23/23   24/24
+letterali leggibili presenti come msgid               146/146
+mutation test (rifiuto / ignore / decodifica)          8 / 6 / 11, tutti verdi
+node --check                                           4 file, nessun errore
+invarianti strutturali (tag, data-*, class, id, action, role, scope)  invariati
+bin/make-pot.php --check                              is up to date (210 strings, 9 files)
+msgfmt -o /dev/null                                   compila
+```
+
 ## Bug trovati nei miei stessi test (corretti prima di dichiarare verde)
 
 1. La probe non chiamava mai `mgws_uninstall_all()`. In WordPress è `uninstall_plugin()`
@@ -214,6 +331,23 @@ verifica che dà falso verde è peggio di nessuna verifica.
    mentre per `__()` è il text domain, e ignorava gli argomenti concatenati. Riscritto: la
    funzione restituisce un valore per argomento, `null` quando l'argomento non è un
    letterale.
+7. La prima serie di mutation test eseguiva `php` **sull'host**, dove non esiste
+   (`rc=127`). I 6 casi del gruppo A riportavano "corretto" perché il criterio era
+   `rc != 0`, e un `rc=127` significa esattamente la stessa cosa di un rifiuto. **Un test che
+   non distingue "ha fallito perché è giusto" da "non è partito" è un test che passa
+   sempre.**
+8. La copia di `make-pot.php` con la correzione di `\uXXXX` finiva nel `/tmp` **dell'host**
+   (`/tmp/opencode/potmut/`), mentre i test girano nel `/tmp` **del container**
+   (`/tmp/potmut/`). Due `/tmp` distinti, nessun errore, e il file sotto test era sempre
+   quello vecchio. Ho perso tempo a cercare un bug in una correzione che era corretta: il
+   sintomo (`Cafè8`) era reale, la causa no. Il banco di prova ora sincronizza lo scratch da
+   un unico path, dichiarato in una variabile con il commento che spiega perché è l'host e
+   non il container.
+9. Nello stesso banco, `tar -C "$PLUGIN"` con `$PLUGIN` un path **del container**: sull'host
+   non esiste, la copia non produceva nulla, `rc=2`, e `php bin/make-pot.php` rispondeva
+   `Could not open input file`. Lo scratch era vuoto e i test non potevano girare.
+   Oggi il driver controlla esplicitamente l'output dello script (`strings,` presente,
+   zero riferimenti al file di mutazione) invece di dedurre la riuscita dal codice di uscita.
 
 ## Stato dei task
 
@@ -222,8 +356,8 @@ verifica che dà falso verde è peggio di nessuna verifica.
 | 1 — `uninstall.php` con test | fatto | `6c6062e` |
 | 2 — header, GPL, `readme.txt`, Woo | fatto | `9e9a304` |
 | 3 — build zip e CI | fatto | `4cd5c58` |
-| 4 — i18n PHP e `.pot` | fatto | vedi sotto |
-| 5 — i18n script admin | da fare | |
+| 4 — i18n PHP e `.pot` | fatto | `936a4a9` |
+| 5 — i18n script admin | fatto | vedi sotto |
 | 6 — copertura sicurezza in CI | da fare | |
 | 7 — verifica di submission | da fare | |
 
@@ -231,10 +365,11 @@ verifica che dà falso verde è peggio di nessuna verifica.
 
 ```
 php -l                                                  nessun errore
+node --check                                            4 file, nessun errore
 tests/mgws_contract_test.php                            SUMMARY failures=0 pending=0   (37 gruppi)
 tests/assert_mgws_contract_matrix.php                   50 required rows verified
 tests/uninstall_test.php                                SUMMARY failures=0             (6 casi)
-bin/make-pot.php --check                                is up to date (117 strings)
+bin/make-pot.php --check                                is up to date (210 strings, 9 files)
 bin/build-release.sh                                    20 files, 2.3.0
 ```
 
@@ -247,3 +382,21 @@ bin/build-release.sh                                    20 files, 2.3.0
   (`msgcat`). Il passaggio runtime resta non provato qui.
 - **`msgunfmt` su un `.mo` vuoto** restituisce 0 msgid: non è un difetto, è che un `.mo`
   senza traduzioni non contiene stringhe. Serve il test di cui sopra per chiuderlo.
+
+## Questioni aperte (decidere prima del Task 7)
+
+- **Lingua dei messaggi di commit.** I commit sono in italiano; il plugin e la UI sono
+  ora in inglese. Non c'è regola, quindi è una scelta dell'utente. Cambiare retroattivamente
+  richiede `git filter-branch`/`rebase` e riscritta delle chiavi di merge.
+- **Display name.** `MG Warehouse Stock` non dice niente a chi non conosce l'app: la
+  directory mostra il nome accanto al nome dell'autore. Serve un nome inglese descrittivo,
+  cambiato **insieme** in header e `readme.txt`, perché i due sono la stessa promessa.
+- **`it_IT` .po.** ~480 stringhe. Lo store non lo richiede e un `.po` invecchiato è peggio
+  di nessun `.po`: i msgid non più presenti nel `.pot` non vengono più cercati e chi
+  traduce li corregge, ma l'inverso no. Il template è a posto; la traduzione è una scelta.
+- **Sottosistema di modale morto in `admin-product.js`** (R37): tradotto e conservato.
+  cancellarlo è manutenzione, non i18n.
+- **R2 ricontrollato alla luce di R33**: l'opzione `mgws_woocommerce_stock_authority` non ha
+  UI (R9). Chi installa dallo store e vuole MGWS autorevole sullo stock deve sapere che
+  l'opzione esiste; `readme.txt` lo dice, ma è testo che nessuno legge. Da valutare nel
+  Task 7 se il nome dell'opzione e la sua posizione nella pagina WooCommerce sono chiari.

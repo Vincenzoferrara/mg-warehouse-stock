@@ -754,13 +754,17 @@ class MGWS_Plugin {
             wp_enqueue_script(
                 'mgws-admin-master',
                 plugins_url('assets/admin-masterdata.js', MGWS_PLUGIN_FILE),
-                array('jquery'),
+                // wp-i18n is declared rather than left to wp_set_script_translations,
+                // which adds it behind the scenes: the script calls wp.i18n, so the
+                // dependency belongs where the other dependencies are.
+                array('jquery', 'wp-i18n'),
                 MGWS_PLUGIN_VERSION,
                 true
             );
             wp_localize_script('mgws-admin-master', 'MGWS_MASTER', array(
                 'ajaxUrl' => admin_url('admin-ajax.php'),
             ));
+            wp_set_script_translations('mgws-admin-master', 'mg-warehouse-stock', MGWS_PLUGIN_DIR . '/languages');
             return;
         }
 
@@ -776,13 +780,14 @@ class MGWS_Plugin {
             wp_enqueue_script(
                 'mgws-admin-order',
                 plugins_url('assets/admin-order.js', MGWS_PLUGIN_FILE),
-                array('jquery'),
+                array('jquery', 'wp-i18n'),
                 MGWS_PLUGIN_VERSION,
                 true
             );
             wp_localize_script('mgws-admin-order', 'MGWS', array(
                 'ajaxUrl' => admin_url('admin-ajax.php'),
             ));
+            wp_set_script_translations('mgws-admin-order', 'mg-warehouse-stock', MGWS_PLUGIN_DIR . '/languages');
             return;
         }
 
@@ -804,13 +809,14 @@ class MGWS_Plugin {
             wp_enqueue_script(
                 'mgws-admin-product',
                 plugins_url('assets/admin-product.js', MGWS_PLUGIN_FILE),
-                array('jquery'),
+                array('jquery', 'wp-i18n'),
                 MGWS_PLUGIN_VERSION,
                 true
             );
             wp_localize_script('mgws-admin-product', 'MGWS_PRODUCT', array(
                 'ajaxUrl' => admin_url('admin-ajax.php'),
             ));
+            wp_set_script_translations('mgws-admin-product', 'mg-warehouse-stock', MGWS_PLUGIN_DIR . '/languages');
             return;
         }
 
@@ -1721,18 +1727,24 @@ class MGWS_Plugin {
         // Block deletion if used by stock levels.
         $links = MGWS_DB::count_warehouse_links_using_location($site_id, $field, $value, $parent_room, $parent_rack);
         if ($links > 0) {
-            wp_send_json_error(array('message' => sprintf(
-                __('Cannot delete: linked to %d warehouses', 'mg-warehouse-stock'),
-                (int) $links
-            )), 409);
+            wp_send_json_error(array(
+                'code' => 'mgws_not_deletable',
+                'message' => sprintf(
+                    __('Cannot delete: linked to %d warehouses', 'mg-warehouse-stock'),
+                    (int) $links
+                ),
+            ), 409);
         }
 
         $used = MGWS_DB::count_levels_using_location($site_id, $field, $value, $parent_room, $parent_rack);
         if ($used > 0) {
-            wp_send_json_error(array('message' => sprintf(
-                __('Cannot delete: used by %d stock levels', 'mg-warehouse-stock'),
-                (int) $used
-            )), 409);
+            wp_send_json_error(array(
+                'code' => 'mgws_not_deletable',
+                'message' => sprintf(
+                    __('Cannot delete: used by %d stock levels', 'mg-warehouse-stock'),
+                    (int) $used
+                ),
+            ), 409);
         }
 
         $res = MGWS_DB::delete_from_site_tree($site_id, $field, $value, $parent_room, $parent_rack);
@@ -1899,11 +1911,14 @@ class MGWS_Plugin {
         $levels = MGWS_DB::count_levels_for_warehouse($warehouse_id);
         $moves = MGWS_DB::count_moves_for_warehouse($warehouse_id);
         if ($levels > 0 || $moves > 0) {
-            wp_send_json_error(array('message' => sprintf(
-                __('Cannot delete: warehouse is in use (levels=%1$d, movements=%2$d)', 'mg-warehouse-stock'),
-                (int) $levels,
-                (int) $moves
-            )), 409);
+            wp_send_json_error(array(
+                'code' => 'mgws_not_deletable',
+                'message' => sprintf(
+                    __('Cannot delete: warehouse is in use (levels=%1$d, movements=%2$d)', 'mg-warehouse-stock'),
+                    (int) $levels,
+                    (int) $moves
+                ),
+            ), 409);
         }
 
         $res = wp_delete_post($warehouse_id, true);
@@ -1939,17 +1954,23 @@ class MGWS_Plugin {
             'fields' => 'ids',
         ));
         if (!empty($warehouses)) {
-            wp_send_json_error(array('message' => __('Cannot delete: the site still has warehouses', 'mg-warehouse-stock')), 409);
+            wp_send_json_error(array(
+                'code' => 'mgws_not_deletable',
+                'message' => __('Cannot delete: the site still has warehouses', 'mg-warehouse-stock'),
+            ), 409);
         }
 
         $levels = MGWS_DB::count_levels_for_site($site_id);
         $moves = MGWS_DB::count_moves_for_site($site_id);
         if ($levels > 0 || $moves > 0) {
-            wp_send_json_error(array('message' => sprintf(
-                __('Cannot delete: site is in use (levels=%1$d, movements=%2$d)', 'mg-warehouse-stock'),
-                (int) $levels,
-                (int) $moves
-            )), 409);
+            wp_send_json_error(array(
+                'code' => 'mgws_not_deletable',
+                'message' => sprintf(
+                    __('Cannot delete: site is in use (levels=%1$d, movements=%2$d)', 'mg-warehouse-stock'),
+                    (int) $levels,
+                    (int) $moves
+                ),
+            ), 409);
         }
 
         $res = wp_delete_post($site_id, true);
