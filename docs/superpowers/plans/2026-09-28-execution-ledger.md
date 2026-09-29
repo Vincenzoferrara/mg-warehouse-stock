@@ -479,7 +479,7 @@ R4 (censimento dei messaggi REST), R5 (text domain con `_x`), e qui.
 | 3 — build zip e CI | fatto | `4cd5c58` |
 | 4 — i18n PHP e `.pot` | fatto | `936a4a9` |
 | 5 — i18n script admin | fatto | `6e15dd3` |
-| 6 — copertura sicurezza in CI | fatto | da committare |
+| 6 — copertura sicurezza in CI | fatto | `b3931c4` |
 | 7 — verifica di submission | da fare | |
 
 ## Baseline (da ristabilire dopo ogni task)
