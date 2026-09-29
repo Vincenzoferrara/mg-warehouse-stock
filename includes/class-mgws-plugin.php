@@ -13,6 +13,16 @@ class MGWS_Plugin {
     private const DB_SCHEMA_VERSION_OPTION = 'mgws_db_schema_version';
     private const DB_SCHEMA_VERSION = '10';
 
+    /**
+     * When enabled, MGWS is the single source of truth for stock and
+     * WooCommerce is not allowed to decrement it a second time.
+     *
+     * Off by default. The filter it controls is order-wide, so refusing it
+     * disables stock reduction for every item in the order and for every other
+     * plugin on the site. A store that wants MGWS authoritative turns this on.
+     */
+    public const OPTION_WOOCOMMERCE_STOCK_AUTHORITY = 'mgws_woocommerce_stock_authority';
+
     public static function instance() {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -39,10 +49,12 @@ class MGWS_Plugin {
         add_action('init', array($this, 'register_order_status'));
         add_filter('wc_order_statuses', array($this, 'add_order_status_to_list'));
 
-        // Avoid Woo double stock reduction. Stock is managed by this plugin.
-        add_filter('woocommerce_can_reduce_order_stock', '__return_false', 10, 2);
+        // Avoid Woo double stock reduction, but only for stores that made MGWS
+        // their stock authority. See filter_can_reduce_order_stock().
+        add_filter('woocommerce_can_reduce_order_stock', array(__CLASS__, 'filter_can_reduce_order_stock'), 10, 2);
 
         add_action('add_meta_boxes', array($this, 'add_order_metabox'));
+        add_action('admin_notices', array($this, 'notice_woocommerce_missing'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
         add_action('admin_menu', array($this, 'register_admin_pages'));
 
@@ -98,6 +110,45 @@ class MGWS_Plugin {
         update_option(self::DB_SCHEMA_VERSION_OPTION, self::DB_SCHEMA_VERSION);
     }
 
+    /**
+     * Decides whether WooCommerce may decrement stock for an order.
+     *
+     * WooCommerce asks this once per order, not once per item, so a `false`
+     * here stops stock reduction for the whole order. That is what MGWS needs
+     * when it owns the stock ledger, and what it must not impose on a store
+     * that has not asked for it.
+     *
+     * @param bool       $reduce Whether WooCommerce wants to reduce stock.
+     * @param mixed|null $order  The order, unused: the decision is store-wide.
+     * @return bool
+     */
+    public static function filter_can_reduce_order_stock(bool $reduce, mixed $order = null): bool {
+        if ('1' === (string) get_option(self::OPTION_WOOCOMMERCE_STOCK_AUTHORITY, '0')) {
+            return false;
+        }
+        return $reduce;
+    }
+
+    /**
+     * Tells the administrator that the plugin cannot do anything useful without
+     * WooCommerce. An admin notice rather than a wp_die: the point is to explain,
+     * not to lock anyone out of their own dashboard.
+     *
+     * @return void
+     */
+    public function notice_woocommerce_missing(): void {
+        if (class_exists('WooCommerce')) {
+            return;
+        }
+
+        echo '<div class="notice notice-error"><p>';
+        echo esc_html__(
+            'MG Warehouse Stock needs WooCommerce to be installed and active. Warehouse levels, purchase orders and the point of sale stay unavailable until it is.',
+            'mg-warehouse-stock'
+        );
+        echo '</p></div>';
+    }
+
     private static function custom_caps() {
         return array(
             'mgws_stock_read',
@@ -151,8 +202,8 @@ class MGWS_Plugin {
         // Under WooCommerce menu.
         add_submenu_page(
             'woocommerce',
-            'Magazzino',
-            'Magazzino',
+            __('Warehouse', 'mg-warehouse-stock'),
+            __('Warehouse', 'mg-warehouse-stock'),
             'manage_woocommerce',
             'mgws-masterdata',
             array($this, 'render_masterdata_page')
@@ -161,22 +212,22 @@ class MGWS_Plugin {
 
     public function render_masterdata_page() {
         if (!current_user_can('manage_woocommerce')) {
-            wp_die('Permessi insufficienti');
+            wp_die(esc_html__('You do not have permission to do that', 'mg-warehouse-stock'));
         }
         $site_limit = $this->get_user_site_limit(get_current_user_id());
         echo '<div class="wrap">';
-        echo '<h1>Magazzino</h1>';
-        echo '<p><small class="mgws-help">Gestione struttura: Sede → Magazzino → Stanza → Scaffale → Mensola.</small></p>';
+        echo '<h1>' . esc_html__('Warehouse', 'mg-warehouse-stock') . '</h1>';
+        echo '<p><small class="mgws-help">' . esc_html__('Manage the location tree: Site → Warehouse → Room → Rack → Shelf.', 'mg-warehouse-stock') . '</small></p>';
         echo '<div id="mgws-master" data-site-limit="' . esc_attr((int) $site_limit) . '">';
         wp_nonce_field('mgws_admin_nonce', 'mgws_admin_nonce');
         echo '<div class="mgws-toolbar">';
-        echo '<button type="button" class="button button-primary" id="mgws-master-reload">Ricarica</button> ';
+        echo '<button type="button" class="button button-primary" id="mgws-master-reload">' . esc_html__('Reload', 'mg-warehouse-stock') . '</button> ';
         if ($site_limit <= 0) {
-            echo '<button type="button" class="button" id="mgws-master-add-site">+ Sede</button> ';
+            echo '<button type="button" class="button" id="mgws-master-add-site">' . esc_html__('+ Site', 'mg-warehouse-stock') . '</button> ';
         }
-        echo '<input type="text" id="mgws-master-filter" placeholder="Cerca (sede, magazzino, stanza...)" style="min-width:320px; max-width:100%;" /> ';
-        echo '<button type="button" class="button" id="mgws-master-expand">Espandi</button> ';
-        echo '<button type="button" class="button" id="mgws-master-collapse">Comprimi</button> ';
+        echo '<input type="text" id="mgws-master-filter" placeholder="' . esc_attr__('Search (site, warehouse, room...)', 'mg-warehouse-stock') . '" style="min-width:320px; max-width:100%;" /> ';
+        echo '<button type="button" class="button" id="mgws-master-expand">' . esc_html__('Expand', 'mg-warehouse-stock') . '</button> ';
+        echo '<button type="button" class="button" id="mgws-master-collapse">' . esc_html__('Collapse', 'mg-warehouse-stock') . '</button> ';
         echo '<span id="mgws-master-msg" style="margin-left:8px;"></span>';
         echo '</div>';
         echo '<div id="mgws-master-tree" style="margin-top:12px;"></div>';
@@ -204,7 +255,7 @@ class MGWS_Plugin {
         }
 
         $tabs['mgws_stock'] = array(
-            'label' => 'Magazzino',
+            'label' => __('Warehouse', 'mg-warehouse-stock'),
             'target' => 'mgws_stock_data',
             'class' => array(),
             'priority' => 75,
@@ -233,8 +284,8 @@ class MGWS_Plugin {
     public function register_cpts() {
         register_post_type('mg_site', array(
             'labels' => array(
-                'name' => 'Sedi',
-                'singular_name' => 'Sede',
+                'name' => _x('Sites', 'post type plural name', 'mg-warehouse-stock'),
+                'singular_name' => _x('Site', 'post type singular name', 'mg-warehouse-stock'),
             ),
             'public' => false,
             // Keep internal but remove standalone UI.
@@ -246,8 +297,8 @@ class MGWS_Plugin {
 
         register_post_type('mg_warehouse', array(
             'labels' => array(
-                'name' => 'Magazzini',
-                'singular_name' => 'Magazzino',
+                'name' => _x('Warehouses', 'post type plural name', 'mg-warehouse-stock'),
+                'singular_name' => _x('Warehouse', 'post type singular name', 'mg-warehouse-stock'),
             ),
             'public' => false,
             // Keep internal but remove standalone UI.
@@ -308,7 +359,7 @@ class MGWS_Plugin {
     private function render_inline_select_with_add($id, $name, $options, $selected, $can_add, $add_action) {
         echo '<div class="mgws-inline">';
         echo '<select class="mgws-select" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '">';
-        echo '<option value="0">-- seleziona --</option>';
+        echo '<option value="0">' . esc_html__('-- select --', 'mg-warehouse-stock') . '</option>';
         foreach ($options as $opt) {
             $opt_id = (string) ($opt['id'] ?? '');
             $opt_name = (string) ($opt['name'] ?? '');
@@ -347,12 +398,12 @@ class MGWS_Plugin {
 
     public function register_order_status() {
         register_post_status('wc-mg-accepted', array(
-            'label' => 'Accettato',
+            'label' => _x('Accepted', 'order status', 'mg-warehouse-stock'),
             'public' => true,
             'exclude_from_search' => false,
             'show_in_admin_all_list' => true,
             'show_in_admin_status_list' => true,
-            'label_count' => _n_noop('Accettato <span class="count">(%s)</span>', 'Accettato <span class="count">(%s)</span>', 'mg-warehouse-stock'),
+            'label_count' => _n_noop('Accepted <span class="count">(%s)</span>', 'Accepted <span class="count">(%s)</span>', 'mg-warehouse-stock'),
         ));
     }
 
@@ -361,11 +412,11 @@ class MGWS_Plugin {
         foreach ($order_statuses as $key => $label) {
             $new_statuses[$key] = $label;
             if ($key === 'wc-processing') {
-                $new_statuses['wc-mg-accepted'] = 'Accettato';
+                $new_statuses['wc-mg-accepted'] = _x('Accepted', 'order status', 'mg-warehouse-stock');
             }
         }
         if (!isset($new_statuses['wc-mg-accepted'])) {
-            $new_statuses['wc-mg-accepted'] = 'Accettato';
+            $new_statuses['wc-mg-accepted'] = _x('Accepted', 'order status', 'mg-warehouse-stock');
         }
         return $new_statuses;
     }
@@ -374,35 +425,68 @@ class MGWS_Plugin {
         if (!class_exists('WooCommerce')) {
             return;
         }
+
+        $screen = 'shop_order';
+        if (class_exists(\Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController::class)
+            && function_exists('wc_get_container')
+            && function_exists('wc_get_page_screen_id')) {
+            try {
+                $controller = wc_get_container()->get(\Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController::class);
+                if (method_exists($controller, 'custom_orders_table_usage_is_enabled')
+                    && $controller->custom_orders_table_usage_is_enabled()) {
+                    $screen = wc_get_page_screen_id('shop-order');
+                }
+            } catch (\Throwable $error) {
+                $screen = 'shop_order';
+            }
+        }
+
         add_meta_box(
             'mgws_accept_box',
-            'Picking / Accettazione',
+            __('Picking / Acceptance', 'mg-warehouse-stock'),
             array($this, 'render_order_metabox'),
-            'shop_order',
+            $screen,
             'side',
             'high'
         );
     }
 
-    public function render_order_metabox($post) {
+    public function render_order_metabox($post_or_order) {
         if (!current_user_can('edit_shop_orders')) {
-            echo '<p>Permessi insufficienti.</p>';
+            echo '<p>' . esc_html__('You do not have permission to do that.', 'mg-warehouse-stock') . '</p>';
             return;
         }
 
-        $order_id = (int) $post->ID;
-        $committed = (int) get_post_meta($order_id, '_mgws_accept_committed', true);
+        if ($post_or_order instanceof WP_Post) {
+            $order_id = (int) $post_or_order->ID;
+        } elseif (is_object($post_or_order) && method_exists($post_or_order, 'get_id')) {
+            $order_id = (int) $post_or_order->get_id();
+        } else {
+            $order_id = isset($_GET['id']) ? absint((string) wp_unslash($_GET['id'])) : 0;
+        }
+
+        if ($order_id <= 0) {
+            echo '<p>' . esc_html__('The order could not be loaded.', 'mg-warehouse-stock') . '</p>';
+            return;
+        }
+
+        $order = function_exists('wc_get_order') ? wc_get_order($order_id) : null;
+        if ($order instanceof WC_Order) {
+            $committed = (int) $order->get_meta('_mgws_accept_committed', true);
+        } else {
+            $committed = (int) get_post_meta($order_id, '_mgws_accept_committed', true);
+        }
 
         wp_nonce_field('mgws_accept_nonce', 'mgws_accept_nonce');
 
         echo '<div id="mgws-accept" data-order-id="' . esc_attr($order_id) . '">';
         if ($committed === 1) {
-            echo '<p><strong>Ordine gia accettato.</strong></p>';
+            echo '<p><strong>' . esc_html__('Order already accepted.', 'mg-warehouse-stock') . '</strong></p>';
         }
-        echo '<p><button type="button" class="button button-primary" id="mgws-load-tree">Carica disponibilita</button></p>';
+        echo '<p><button type="button" class="button button-primary" id="mgws-load-tree">' . esc_html__('Load availability', 'mg-warehouse-stock') . '</button></p>';
         echo '<div id="mgws-tree" style="max-height: 360px; overflow: auto;"></div>';
         echo '<div id="mgws-totals" style="margin-top: 8px;"></div>';
-        echo '<p style="margin-top: 10px;"><button type="button" class="button button-primary" id="mgws-commit" disabled>Accetta</button></p>';
+        echo '<p style="margin-top: 10px;"><button type="button" class="button button-primary" id="mgws-commit" disabled>' . esc_html__('Accept order', 'mg-warehouse-stock') . '</button></p>';
         echo '<div id="mgws-msg" style="margin-top: 8px;"></div>';
         echo '</div>';
     }
@@ -421,7 +505,7 @@ class MGWS_Plugin {
         $site_limit = $this->get_user_site_limit(get_current_user_id());
         $product = function_exists('wc_get_product') ? wc_get_product($product_id) : null;
         if (!$product) {
-            echo '<p>Prodotto non valido.</p>';
+            echo '<p>' . esc_html__('Invalid product.', 'mg-warehouse-stock') . '</p>';
             return;
         }
 
@@ -448,14 +532,14 @@ class MGWS_Plugin {
         wp_nonce_field('mgws_product_save_defaults', 'mgws_product_save_defaults');
 
         echo '<div class="options_group">';
-        echo '<p class="form-field"><strong>Ubicazione default</strong></p>';
-        echo '<p class="form-field"><small class="mgws-help">Ordine: Sede → Magazzino → Stanza → Scaffale → Mensola. Per aggiungere o eliminare vai in WooCommerce → Magazzino.</small></p>';
+        echo '<p class="form-field"><strong>' . esc_html__('Default location', 'mg-warehouse-stock') . '</strong></p>';
+        echo '<p class="form-field"><small class="mgws-help">' . esc_html__('Order: Site → Warehouse → Room → Rack → Shelf. To add or remove locations, go to WooCommerce → Warehouse.', 'mg-warehouse-stock') . '</small></p>';
         $is_virtual = $product ? (bool) $product->is_virtual() : false;
         $user_id = (int) get_current_user_id();
         echo '<div id="mgws-product" data-product-id="' . esc_attr($product_id) . '" data-site-limit="' . esc_attr($site_limit) . '" data-default-site-id="' . esc_attr($default_site_id) . '" data-is-virtual="' . esc_attr($is_virtual ? 1 : 0) . '" data-user-id="' . esc_attr($user_id) . '">';
 
         if ($default_site_id <= 0 || $default_warehouse_id <= 0) {
-            echo '<p class="form-field"><span style="color:#b32d2e; font-weight:600;">Default location non impostata.</span></p>';
+            echo '<p class="form-field"><span style="color:#b32d2e; font-weight:600;">' . esc_html__('Default location not set.', 'mg-warehouse-stock') . '</span></p>';
         }
 
         // No per-variation stock ops in product UI.
@@ -482,9 +566,9 @@ class MGWS_Plugin {
 
         echo '<div class="mgws-loc-card">';
         echo '<div class="mgws-loc-row">';
-        echo '<div class="mgws-field mgws-loc-field"><div class="mgws-field-label">Sede</div>';
+        echo '<div class="mgws-field mgws-loc-field"><div class="mgws-field-label">' . esc_html__('Site', 'mg-warehouse-stock') . '</div>';
         if ($site_limit > 0) {
-            $site_title = !empty($sites) ? $sites[0]->post_title : ('Sede #' . $site_limit);
+            $site_title = !empty($sites) ? $sites[0]->post_title : (__('Site #', 'mg-warehouse-stock') . ' ' . $site_limit);
             // Use an enabled select with a single option so selectWoo/select2 renders it.
             echo '<select class="mgws-select" id="mgws-site" name="mgws_default_site_id">'
                 . '<option value="' . esc_attr($site_limit) . '" selected>' . esc_html($site_title) . '</option>'
@@ -494,19 +578,19 @@ class MGWS_Plugin {
         }
         echo '</div>';
 
-        echo '<div class="mgws-field mgws-loc-field"><div class="mgws-field-label">Magazzino</div>';
+        echo '<div class="mgws-field mgws-loc-field"><div class="mgws-field-label">' . esc_html__('Warehouse', 'mg-warehouse-stock') . '</div>';
         $this->render_inline_select_with_add('mgws-product-warehouse', 'mgws_default_warehouse_id', $wh_opts, $default_warehouse_id, false, 'create_warehouse');
         echo '</div>';
 
-        echo '<div class="mgws-field mgws-loc-field"><div class="mgws-field-label">Stanza</div>';
+        echo '<div class="mgws-field mgws-loc-field"><div class="mgws-field-label">' . esc_html__('Room', 'mg-warehouse-stock') . '</div>';
         $this->render_location_select_with_add('mgws-default-room', 'mgws_default_room', $suggest['rooms'], $default_room, 'mgws-product-warehouse', 'room', false);
         echo '</div>';
 
-        echo '<div class="mgws-field mgws-loc-field"><div class="mgws-field-label">Scaffale</div>';
+        echo '<div class="mgws-field mgws-loc-field"><div class="mgws-field-label">' . esc_html__('Rack', 'mg-warehouse-stock') . '</div>';
         $this->render_location_select_with_add('mgws-default-rack', 'mgws_default_rack', $suggest['racks'], $default_rack, 'mgws-product-warehouse', 'rack', false);
         echo '</div>';
 
-        echo '<div class="mgws-field mgws-loc-field"><div class="mgws-field-label">Mensola</div>';
+        echo '<div class="mgws-field mgws-loc-field"><div class="mgws-field-label">' . esc_html__('Shelf', 'mg-warehouse-stock') . '</div>';
         $this->render_location_select_with_add('mgws-default-shelf', 'mgws_default_shelf', $suggest['shelves'], $default_shelf, 'mgws-product-warehouse', 'shelf', false);
         echo '</div>';
 
@@ -514,13 +598,13 @@ class MGWS_Plugin {
         echo '</div>';
 
         echo '<div class="mgws-inline">';
-        echo '<a class="button" href="' . esc_url($master_url) . '">Gestisci sedi / magazzini / ubicazioni</a>';
+        echo '<a class="button" href="' . esc_url($master_url) . '">' . esc_html__('Manage sites, warehouses and locations', 'mg-warehouse-stock') . '</a>';
         echo '</div>';
         echo '</div>';
 
         $purchase_cost = (string) get_post_meta($product_id, '_purchase_cost', true);
         echo '<div class="options_group">';
-        echo '<p class="form-field"><label for="_purchase_cost">Costo di acquisto</label><input type="text" class="short wc_input_price" name="_purchase_cost" id="_purchase_cost" value="' . esc_attr($purchase_cost) . '"> <span class="description">Meta Woo `_purchase_cost`, aggiornato anche dalle ricezioni fornitore.</span></p>';
+        echo '<p class="form-field"><label for="_purchase_cost">' . esc_html__('Purchase cost', 'mg-warehouse-stock') . '</label><input type="text" class="short wc_input_price" name="_purchase_cost" id="_purchase_cost" value="' . esc_attr($purchase_cost) . '"> <span class="description">' . esc_html__('WooCommerce `_purchase_cost` meta, also updated by supplier receipts.', 'mg-warehouse-stock') . '</span></p>';
         echo '</div>';
 
         echo '<div id="mgws-product-msg"></div>';
@@ -531,15 +615,15 @@ class MGWS_Plugin {
         // Per-variation default locations (sezione separata).
         if ($product->is_type('variable') && !empty($variations)) {
             echo '<div class="options_group">';
-            echo '<p class="form-field"><strong>Default location per variante</strong></p>';
-            echo '<p class="form-field"><small>Imposta Sede/Magazzino/Stanza/Scaffale/Mensola per ogni variante. I campi sono opzionali.</small></p>';
+            echo '<p class="form-field"><strong>' . esc_html__('Default location per variation', 'mg-warehouse-stock') . '</strong></p>';
+            echo '<p class="form-field"><small>' . esc_html__('Set Site / Warehouse / Room / Rack / Shelf for each variation. All fields are optional.', 'mg-warehouse-stock') . '</small></p>';
 
             echo '<p class="form-field">';
             echo '<span class="mgws-inline">';
-            echo '<input type="text" id="mgws-var-filter" placeholder="Filtra varianti..." />';
-            echo '<button type="button" class="button" id="mgws-var-fill-empty">Copia default su vuote</button>';
-            echo '<button type="button" class="button" id="mgws-var-reset-cols">Reset colonne</button>';
-            echo '<small style="opacity:.85;">Salva il prodotto per confermare.</small>';
+            echo '<input type="text" id="mgws-var-filter" placeholder="' . esc_attr__('Filter variations...', 'mg-warehouse-stock') . '" />';
+            echo '<button type="button" class="button" id="mgws-var-fill-empty">' . esc_html__('Copy default to empty', 'mg-warehouse-stock') . '</button>';
+            echo '<button type="button" class="button" id="mgws-var-reset-cols">' . esc_html__('Reset columns', 'mg-warehouse-stock') . '</button>';
+            echo '<small style="opacity:.85;">' . esc_html__('Save the product to confirm.', 'mg-warehouse-stock') . '</small>';
             echo '</span>';
             echo '</p>';
 
@@ -550,15 +634,15 @@ class MGWS_Plugin {
             echo '</colgroup>';
             echo '<thead>';
             echo '<tr>';
-            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">Nome</th>';
+            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">' . esc_html__('Name', 'mg-warehouse-stock') . '</th>';
             echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">SKU</th>';
-            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">Costo acquisto</th>';
-            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">Variante</th>';
-            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">Sede</th>';
-            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">Magazzino</th>';
-            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">Stanza</th>';
-            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">Scaffale</th>';
-            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">Mensola</th>';
+            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">' . esc_html__('Purchase cost', 'mg-warehouse-stock') . '</th>';
+            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">' . esc_html__('Variation', 'mg-warehouse-stock') . '</th>';
+            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">' . esc_html__('Site', 'mg-warehouse-stock') . '</th>';
+            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">' . esc_html__('Warehouse', 'mg-warehouse-stock') . '</th>';
+            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">' . esc_html__('Room', 'mg-warehouse-stock') . '</th>';
+            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">' . esc_html__('Rack', 'mg-warehouse-stock') . '</th>';
+            echo '<th style="text-align:left; padding:4px; border-bottom:1px solid #dcdcde;">' . esc_html__('Shelf', 'mg-warehouse-stock') . '</th>';
             echo '</tr>';
             echo '</thead><tbody>';
 
@@ -567,7 +651,7 @@ class MGWS_Plugin {
             foreach ($variations as $vid) {
                 $vid = (int) $vid;
                 $vp = wc_get_product($vid);
-                $base_name = $product ? (string) $product->get_name() : 'Prodotto';
+                $base_name = $product ? (string) $product->get_name() : __('Product', 'mg-warehouse-stock');
                 $sku = ($vp && method_exists($vp, 'get_sku')) ? (string) $vp->get_sku() : '';
                 $attr_lines = array();
                 if ($vp && method_exists($vp, 'get_variation_attributes')) {
@@ -624,7 +708,7 @@ class MGWS_Plugin {
                 // Site
                 echo '<td style="padding:4px; border-top:1px solid #f0f0f1;">';
                 if ($site_limit > 0) {
-                    $site_title = !empty($sites_for_user) ? $sites_for_user[0]->post_title : ('Sede #' . $site_limit);
+                    $site_title = !empty($sites_for_user) ? $sites_for_user[0]->post_title : (__('Site #', 'mg-warehouse-stock') . ' ' . $site_limit);
                     echo '<small>' . esc_html($site_title) . '</small>';
                     echo '<input type="hidden" class="mgws-var-site" name="mgws_var_defaults[' . esc_attr($vid) . '][site_id]" value="' . esc_attr($site_limit) . '">';
                 } else {
@@ -703,18 +787,28 @@ class MGWS_Plugin {
             wp_enqueue_script(
                 'mgws-admin-master',
                 plugins_url('assets/admin-masterdata.js', MGWS_PLUGIN_FILE),
-                array('jquery'),
+                // wp-i18n is declared rather than left to wp_set_script_translations,
+                // which adds it behind the scenes: the script calls wp.i18n, so the
+                // dependency belongs where the other dependencies are.
+                array('jquery', 'wp-i18n'),
                 MGWS_PLUGIN_VERSION,
                 true
             );
             wp_localize_script('mgws-admin-master', 'MGWS_MASTER', array(
                 'ajaxUrl' => admin_url('admin-ajax.php'),
             ));
+            wp_set_script_translations('mgws-admin-master', 'mg-warehouse-stock', MGWS_PLUGIN_DIR . '/languages');
             return;
         }
 
         // Order metabox assets.
-        $is_order_screen = ($screen->id === 'shop_order') || (($screen->post_type ?? '') === 'shop_order');
+        $hpos_order_screen_id = function_exists('wc_get_page_screen_id')
+            ? wc_get_page_screen_id('shop-order')
+            : 'woocommerce_page_wc-orders';
+        $is_order_screen = ($screen->id === 'shop_order')
+            || ($screen->id === $hpos_order_screen_id)
+            || (($screen->post_type ?? '') === 'shop_order')
+            || (filter_input(INPUT_GET, 'page') === 'wc-orders' && filter_input(INPUT_GET, 'action') === 'edit');
         if ($is_order_screen) {
             wp_enqueue_style(
                 'mgws-admin-order',
@@ -725,13 +819,14 @@ class MGWS_Plugin {
             wp_enqueue_script(
                 'mgws-admin-order',
                 plugins_url('assets/admin-order.js', MGWS_PLUGIN_FILE),
-                array('jquery'),
+                array('jquery', 'wp-i18n'),
                 MGWS_PLUGIN_VERSION,
                 true
             );
             wp_localize_script('mgws-admin-order', 'MGWS', array(
                 'ajaxUrl' => admin_url('admin-ajax.php'),
             ));
+            wp_set_script_translations('mgws-admin-order', 'mg-warehouse-stock', MGWS_PLUGIN_DIR . '/languages');
             return;
         }
 
@@ -753,13 +848,14 @@ class MGWS_Plugin {
             wp_enqueue_script(
                 'mgws-admin-product',
                 plugins_url('assets/admin-product.js', MGWS_PLUGIN_FILE),
-                array('jquery'),
+                array('jquery', 'wp-i18n'),
                 MGWS_PLUGIN_VERSION,
                 true
             );
             wp_localize_script('mgws-admin-product', 'MGWS_PRODUCT', array(
                 'ajaxUrl' => admin_url('admin-ajax.php'),
             ));
+            wp_set_script_translations('mgws-admin-product', 'mg-warehouse-stock', MGWS_PLUGIN_DIR . '/languages');
             return;
         }
 
@@ -906,11 +1002,11 @@ class MGWS_Plugin {
     private function resolve_item_ids_from_selection($product_or_variation_id) {
         $selected_id = (int) $product_or_variation_id;
         if ($selected_id <= 0 || !function_exists('wc_get_product')) {
-            return array('ok' => false, 'message' => 'Prodotto non valido');
+            return array('ok' => false, 'message' => __('Invalid product', 'mg-warehouse-stock'));
         }
         $p = wc_get_product($selected_id);
         if (!$p) {
-            return array('ok' => false, 'message' => 'Prodotto non trovato');
+            return array('ok' => false, 'message' => __('Product not found', 'mg-warehouse-stock'));
         }
         if ($p->is_type('variation')) {
             $variation_id = $selected_id;
@@ -942,7 +1038,7 @@ class MGWS_Plugin {
         $variation_id = (int) $variation_id;
 
         if ($product_id <= 0 || $variation_id < 0) {
-            return new WP_Error('mgws_bad_request', 'Prodotto non valido');
+            return new WP_Error('mgws_bad_request', __('Invalid product', 'mg-warehouse-stock'));
         }
 
         if (!function_exists('wc_get_product')) {
@@ -952,17 +1048,17 @@ class MGWS_Plugin {
         if ($variation_id > 0) {
             $variation = wc_get_product($variation_id);
             if (!$variation || !$variation->is_type('variation')) {
-                return new WP_Error('mgws_bad_request', 'Variante non valida');
+                return new WP_Error('mgws_bad_request', __('Invalid variation', 'mg-warehouse-stock'));
             }
             if ((int) $variation->get_parent_id() !== $product_id) {
-                return new WP_Error('mgws_bad_request', 'Variante non coerente con il prodotto');
+                return new WP_Error('mgws_bad_request', __('Variation does not belong to this product', 'mg-warehouse-stock'));
             }
             return true;
         }
 
         $product = wc_get_product($product_id);
         if (!$product || $product->is_type('variation')) {
-            return new WP_Error('mgws_bad_request', 'Prodotto non valido');
+            return new WP_Error('mgws_bad_request', __('Invalid product', 'mg-warehouse-stock'));
         }
 
         return true;
@@ -970,16 +1066,16 @@ class MGWS_Plugin {
 
     public function ajax_get_accept_tree() {
         if (!$this->can_accept_orders_ajax()) {
-            wp_send_json_error(array('message' => 'Permessi insufficienti'), 403);
+            wp_send_json_error(array('message' => __('You do not have permission to do that', 'mg-warehouse-stock')), 403);
         }
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mgws_accept_nonce')) {
-            wp_send_json_error(array('message' => 'Nonce non valido'), 400);
+            wp_send_json_error(array('message' => __('Invalid security token', 'mg-warehouse-stock')), 400);
         }
 
         $order_id = isset($_POST['order_id']) ? (int) $_POST['order_id'] : 0;
         $order = $order_id > 0 ? wc_get_order($order_id) : null;
         if (!$order) {
-            wp_send_json_error(array('message' => 'Ordine non valido'), 404);
+            wp_send_json_error(array('message' => __('Invalid order', 'mg-warehouse-stock')), 404);
         }
 
         $site_limit = $this->get_user_site_limit(get_current_user_id());
@@ -1033,14 +1129,14 @@ class MGWS_Plugin {
             if (!isset($tree[$sid])) {
                 $tree[$sid] = array(
                     'site_id' => $sid,
-                    'site_name' => $site_names[$sid] ?? ('Sede #' . $sid),
+                    'site_name' => $site_names[$sid] ?? (__('Site #', 'mg-warehouse-stock') . ' ' . $sid),
                     'warehouses' => array(),
                 );
             }
             if (!isset($tree[$sid]['warehouses'][$wid])) {
                 $tree[$sid]['warehouses'][$wid] = array(
                     'warehouse_id' => $wid,
-                    'warehouse_name' => $warehouse_names[$wid] ?? ('Magazzino #' . $wid),
+                    'warehouse_name' => $warehouse_names[$wid] ?? (__('Warehouse #', 'mg-warehouse-stock') . ' ' . $wid),
                     'cards' => array(),
                 );
             }
@@ -1111,27 +1207,27 @@ class MGWS_Plugin {
 
     public function ajax_commit_accept() {
         if (!$this->can_accept_orders_ajax()) {
-            wp_send_json_error(array('message' => 'Permessi insufficienti'), 403);
+            wp_send_json_error(array('message' => __('You do not have permission to do that', 'mg-warehouse-stock')), 403);
         }
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mgws_accept_nonce')) {
-            wp_send_json_error(array('message' => 'Nonce non valido'), 400);
+            wp_send_json_error(array('message' => __('Invalid security token', 'mg-warehouse-stock')), 400);
         }
 
         $order_id = isset($_POST['order_id']) ? (int) $_POST['order_id'] : 0;
         $order = $order_id > 0 ? wc_get_order($order_id) : null;
         if (!$order) {
-            wp_send_json_error(array('message' => 'Ordine non valido'), 404);
+            wp_send_json_error(array('message' => __('Invalid order', 'mg-warehouse-stock')), 404);
         }
 
         $committed = (int) get_post_meta($order_id, '_mgws_accept_committed', true);
         if ($committed === 1) {
-            wp_send_json_error(array('message' => 'Ordine gia accettato'), 409);
+            wp_send_json_error(array('message' => __('Order already accepted', 'mg-warehouse-stock')), 409);
         }
 
         $payload = isset($_POST['payload']) ? wp_unslash($_POST['payload']) : '';
         $data = json_decode($payload, true);
         if (!is_array($data)) {
-            wp_send_json_error(array('message' => 'Payload non valido'), 400);
+            wp_send_json_error(array('message' => __('Invalid payload', 'mg-warehouse-stock')), 400);
         }
 
         $allow_partial = !empty($data['allow_partial']);
@@ -1177,7 +1273,7 @@ class MGWS_Plugin {
                     continue;
                 }
                 if ($site_limit > 0 && $site_id !== $site_limit) {
-                    wp_send_json_error(array('message' => 'Allocazione fuori sede consentita'), 403);
+                    wp_send_json_error(array('message' => __('Allocation is outside your assigned site', 'mg-warehouse-stock')), 403);
                 }
 
                 $allocations[] = array(
@@ -1200,7 +1296,7 @@ class MGWS_Plugin {
             foreach ($required_map as $k => $req) {
                 $alloc = (int) ($allocated_by_card[$k] ?? 0);
                 if ($alloc < (int) $req) {
-                    wp_send_json_error(array('message' => 'Quantita non sufficiente per tutte le righe ordine'), 400);
+                    wp_send_json_error(array('message' => __('Not enough stock for every order line', 'mg-warehouse-stock')), 400);
                 }
             }
         }
@@ -1251,14 +1347,17 @@ class MGWS_Plugin {
         update_post_meta($order_id, '_mgws_accept_committed_by', $user_id);
         update_post_meta($order_id, '_mgws_allocation_v1', wp_json_encode($allocation_audit));
 
-        $note = 'Ordine accettato.';
+        $note = __('Order accepted.', 'mg-warehouse-stock');
         if ($allocation_audit['totals']['total_remaining'] > 0) {
-            $note .= ' Attenzione: stock insufficiente per ' . (int) $allocation_audit['totals']['total_remaining'] . ' unita.';
+            $note .= ' ' . sprintf(
+                __('Warning: not enough stock for %d units.', 'mg-warehouse-stock'),
+                (int) $allocation_audit['totals']['total_remaining']
+            );
         }
         $order->add_order_note($note, false, true);
         $order->update_status('mg-accepted');
 
-        wp_send_json_success(array('message' => 'Ordine accettato', 'totals' => $allocation_audit['totals']));
+        wp_send_json_success(array('message' => __('Order accepted', 'mg-warehouse-stock'), 'totals' => $allocation_audit['totals']));
     }
 
     private function sync_woo_stock($product_id, $variation_id) {
@@ -1298,15 +1397,15 @@ class MGWS_Plugin {
             }
         }
         $p = wc_get_product($product_id);
-        return $p ? $p->get_name() : ('Prodotto #' . $product_id);
+        return $p ? $p->get_name() : (__('Product #', 'mg-warehouse-stock') . ' ' . $product_id);
     }
 
     public function ajax_get_product_stock() {
         if (!$this->can_read_stock_ajax()) {
-            wp_send_json_error(array('message' => 'Permessi insufficienti'), 403);
+            wp_send_json_error(array('message' => __('You do not have permission to do that', 'mg-warehouse-stock')), 403);
         }
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mgws_product_nonce')) {
-            wp_send_json_error(array('message' => 'Nonce non valido'), 400);
+            wp_send_json_error(array('message' => __('Invalid security token', 'mg-warehouse-stock')), 400);
         }
 
         $product_id = isset($_POST['product_id']) ? (int) $_POST['product_id'] : 0;
@@ -1346,7 +1445,7 @@ class MGWS_Plugin {
 
     public function ajax_get_warehouses_for_site() {
         if (!current_user_can('edit_products') && !current_user_can('manage_woocommerce')) {
-            wp_send_json_error(array('message' => 'Permessi insufficienti'), 403);
+            wp_send_json_error(array('message' => __('You do not have permission to do that', 'mg-warehouse-stock')), 403);
         }
         $this->require_ajax_nonce_any(array('mgws_product_nonce', 'mgws_admin_nonce'));
 
@@ -1369,7 +1468,7 @@ class MGWS_Plugin {
 
     public function ajax_get_location_suggestions() {
         if (!current_user_can('edit_products') && !current_user_can('manage_woocommerce')) {
-            wp_send_json_error(array('message' => 'Permessi insufficienti'), 403);
+            wp_send_json_error(array('message' => __('You do not have permission to do that', 'mg-warehouse-stock')), 403);
         }
         $this->require_ajax_nonce_any(array('mgws_product_nonce', 'mgws_admin_nonce'));
 
@@ -1380,7 +1479,7 @@ class MGWS_Plugin {
         }
         $wh_site = MGWS_DB::get_site_id_for_warehouse($warehouse_id);
         if ($site_limit > 0 && (int) $wh_site !== (int) $site_limit) {
-            wp_send_json_error(array('message' => 'Magazzino fuori sede consentita'), 403);
+            wp_send_json_error(array('message' => __('Warehouse is outside your assigned site', 'mg-warehouse-stock')), 403);
         }
 
         $suggest = MGWS_DB::get_location_suggestions_for_warehouse($warehouse_id);
@@ -1389,18 +1488,18 @@ class MGWS_Plugin {
 
     public function ajax_create_site() {
         if (!$this->can_manage_master_data()) {
-            wp_send_json_error(array('message' => 'Permessi insufficienti'), 403);
+            wp_send_json_error(array('message' => __('You do not have permission to do that', 'mg-warehouse-stock')), 403);
         }
         $this->require_ajax_nonce_any(array('mgws_product_nonce', 'mgws_admin_nonce'));
 
         $site_limit = $this->get_user_site_limit(get_current_user_id());
         if ($site_limit > 0) {
-            wp_send_json_error(array('message' => 'Utente limitato a una sede: non puo creare nuove sedi'), 403);
+            wp_send_json_error(array('message' => __('This user is limited to one site and cannot create new ones', 'mg-warehouse-stock')), 403);
         }
 
         $name = isset($_POST['name']) ? sanitize_text_field(wp_unslash($_POST['name'])) : '';
         if ($name === '') {
-            wp_send_json_error(array('message' => 'Nome sede mancante'), 400);
+            wp_send_json_error(array('message' => __('Site name is missing', 'mg-warehouse-stock')), 400);
         }
 
         $id = wp_insert_post(array(
@@ -1410,7 +1509,7 @@ class MGWS_Plugin {
             'post_author' => get_current_user_id(),
         ));
         if (is_wp_error($id) || (int) $id <= 0) {
-            wp_send_json_error(array('message' => 'Errore creazione sede'), 500);
+            wp_send_json_error(array('message' => __('Could not create the site', 'mg-warehouse-stock')), 500);
         }
 
         wp_send_json_success(array('site' => array('id' => (int) $id, 'name' => $name)));
@@ -1418,14 +1517,14 @@ class MGWS_Plugin {
 
     public function ajax_create_warehouse() {
         if (!$this->can_manage_master_data()) {
-            wp_send_json_error(array('message' => 'Permessi insufficienti'), 403);
+            wp_send_json_error(array('message' => __('You do not have permission to do that', 'mg-warehouse-stock')), 403);
         }
         $this->require_ajax_nonce_any(array('mgws_product_nonce', 'mgws_admin_nonce'));
 
         $site_id = isset($_POST['site_id']) ? (int) $_POST['site_id'] : 0;
         $name = isset($_POST['name']) ? sanitize_text_field(wp_unslash($_POST['name'])) : '';
         if ($site_id <= 0 || $name === '') {
-            wp_send_json_error(array('message' => 'Dati mancanti'), 400);
+            wp_send_json_error(array('message' => __('Missing data', 'mg-warehouse-stock')), 400);
         }
 
         $site_limit = $this->get_user_site_limit(get_current_user_id());
@@ -1440,7 +1539,7 @@ class MGWS_Plugin {
             'post_author' => get_current_user_id(),
         ));
         if (is_wp_error($id) || (int) $id <= 0) {
-            wp_send_json_error(array('message' => 'Errore creazione magazzino'), 500);
+            wp_send_json_error(array('message' => __('Could not create the warehouse', 'mg-warehouse-stock')), 500);
         }
         update_post_meta((int) $id, 'mg_site_id', $site_id);
 
@@ -1449,10 +1548,10 @@ class MGWS_Plugin {
 
     public function ajax_admin_get_tree() {
         if (!current_user_can('manage_woocommerce')) {
-            wp_send_json_error(array('message' => 'Permessi insufficienti'), 403);
+            wp_send_json_error(array('message' => __('You do not have permission to do that', 'mg-warehouse-stock')), 403);
         }
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mgws_admin_nonce')) {
-            wp_send_json_error(array('message' => 'Nonce non valido'), 400);
+            wp_send_json_error(array('message' => __('Invalid security token', 'mg-warehouse-stock')), 400);
         }
 
         $site_limit = $this->get_user_site_limit(get_current_user_id());
@@ -1507,7 +1606,7 @@ class MGWS_Plugin {
 
     public function ajax_add_location_value() {
         if (!current_user_can('edit_products') && !current_user_can('manage_woocommerce')) {
-            wp_send_json_error(array('message' => 'Permessi insufficienti'), 403);
+            wp_send_json_error(array('message' => __('You do not have permission to do that', 'mg-warehouse-stock')), 403);
         }
         $this->require_ajax_nonce_any(array('mgws_product_nonce', 'mgws_admin_nonce'));
 
@@ -1520,7 +1619,7 @@ class MGWS_Plugin {
         $parent_rack = isset($_POST['parent_rack']) ? sanitize_text_field(wp_unslash($_POST['parent_rack'])) : '';
 
         if (($warehouse_id <= 0 && $site_id <= 0) || $value === '') {
-            wp_send_json_error(array('message' => 'Dati mancanti'), 400);
+            wp_send_json_error(array('message' => __('Missing data', 'mg-warehouse-stock')), 400);
         }
 
         $site_limit = $this->get_user_site_limit(get_current_user_id());
@@ -1530,10 +1629,10 @@ class MGWS_Plugin {
             $site_id = MGWS_DB::get_site_id_for_warehouse($warehouse_id);
         }
         if ($site_id <= 0) {
-            wp_send_json_error(array('message' => 'Sede non valida'), 400);
+            wp_send_json_error(array('message' => __('Invalid site', 'mg-warehouse-stock')), 400);
         }
         if ($site_limit > 0 && (int) $site_id !== (int) $site_limit) {
-            wp_send_json_error(array('message' => 'Sede fuori sede consentita'), 403);
+            wp_send_json_error(array('message' => __('Site is outside your assigned site', 'mg-warehouse-stock')), 403);
         }
 
         $value = MGWS_DB::sanitize_loc($value);
@@ -1548,15 +1647,15 @@ class MGWS_Plugin {
         } elseif ($field === 'shelf') {
             $meta_key = 'mgws_site_shelves';
         } else {
-            wp_send_json_error(array('message' => 'Campo non valido'), 400);
+            wp_send_json_error(array('message' => __('Invalid field', 'mg-warehouse-stock')), 400);
         }
 
         // Enforce hierarchy: room -> rack -> shelf.
         if ($field === 'rack' && $parent_room === '') {
-            wp_send_json_error(array('message' => 'Seleziona prima una stanza'), 400);
+            wp_send_json_error(array('message' => __('Select a room first', 'mg-warehouse-stock')), 400);
         }
         if ($field === 'shelf' && ($parent_room === '' || $parent_rack === '')) {
-            wp_send_json_error(array('message' => 'Seleziona prima stanza e scaffale'), 400);
+            wp_send_json_error(array('message' => __('Select a room and a rack first', 'mg-warehouse-stock')), 400);
         }
 
         $arr = get_post_meta($site_id, $meta_key, true);
@@ -1626,7 +1725,7 @@ class MGWS_Plugin {
 
     public function ajax_delete_location_value() {
         if (!current_user_can('edit_products') && !current_user_can('manage_woocommerce')) {
-            wp_send_json_error(array('message' => 'Permessi insufficienti'), 403);
+            wp_send_json_error(array('message' => __('You do not have permission to do that', 'mg-warehouse-stock')), 403);
         }
         $this->require_ajax_nonce_any(array('mgws_product_nonce', 'mgws_admin_nonce'));
 
@@ -1638,7 +1737,7 @@ class MGWS_Plugin {
         $parent_rack = isset($_POST['parent_rack']) ? sanitize_text_field(wp_unslash($_POST['parent_rack'])) : '';
 
         if (($warehouse_id <= 0 && $site_id <= 0) || $field === '' || $value === '') {
-            wp_send_json_error(array('message' => 'Dati mancanti'), 400);
+            wp_send_json_error(array('message' => __('Missing data', 'mg-warehouse-stock')), 400);
         }
 
         $site_limit = $this->get_user_site_limit(get_current_user_id());
@@ -1646,10 +1745,10 @@ class MGWS_Plugin {
             $site_id = MGWS_DB::get_site_id_for_warehouse($warehouse_id);
         }
         if ($site_id <= 0) {
-            wp_send_json_error(array('message' => 'Sede non valida'), 400);
+            wp_send_json_error(array('message' => __('Invalid site', 'mg-warehouse-stock')), 400);
         }
         if ($site_limit > 0 && (int) $site_id !== (int) $site_limit) {
-            wp_send_json_error(array('message' => 'Sede fuori sede consentita'), 403);
+            wp_send_json_error(array('message' => __('Site is outside your assigned site', 'mg-warehouse-stock')), 403);
         }
 
         $value = MGWS_DB::sanitize_loc($value);
@@ -1658,26 +1757,38 @@ class MGWS_Plugin {
 
         // Enforce hierarchy requirements.
         if ($field === 'rack' && $parent_room === '') {
-            wp_send_json_error(array('message' => 'Seleziona prima una stanza'), 400);
+            wp_send_json_error(array('message' => __('Select a room first', 'mg-warehouse-stock')), 400);
         }
         if ($field === 'shelf' && ($parent_room === '' || $parent_rack === '')) {
-            wp_send_json_error(array('message' => 'Seleziona prima stanza e scaffale'), 400);
+            wp_send_json_error(array('message' => __('Select a room and a rack first', 'mg-warehouse-stock')), 400);
         }
 
         // Block deletion if used by stock levels.
         $links = MGWS_DB::count_warehouse_links_using_location($site_id, $field, $value, $parent_room, $parent_rack);
         if ($links > 0) {
-            wp_send_json_error(array('message' => 'Impossibile eliminare: collegato a ' . (int) $links . ' magazzini'), 409);
+            wp_send_json_error(array(
+                'code' => 'mgws_not_deletable',
+                'message' => sprintf(
+                    __('Cannot delete: linked to %d warehouses', 'mg-warehouse-stock'),
+                    (int) $links
+                ),
+            ), 409);
         }
 
         $used = MGWS_DB::count_levels_using_location($site_id, $field, $value, $parent_room, $parent_rack);
         if ($used > 0) {
-            wp_send_json_error(array('message' => 'Impossibile eliminare: usato in ' . (int) $used . ' livelli di stock'), 409);
+            wp_send_json_error(array(
+                'code' => 'mgws_not_deletable',
+                'message' => sprintf(
+                    __('Cannot delete: used by %d stock levels', 'mg-warehouse-stock'),
+                    (int) $used
+                ),
+            ), 409);
         }
 
         $res = MGWS_DB::delete_from_site_tree($site_id, $field, $value, $parent_room, $parent_rack);
         if (empty($res['ok'])) {
-            wp_send_json_error(array('message' => $res['message'] ?? 'Errore'), 400);
+            wp_send_json_error(array('message' => $res['message'] ?? __('Error', 'mg-warehouse-stock')), 400);
         }
 
         // Return updated suggestions.
@@ -1706,10 +1817,10 @@ class MGWS_Plugin {
 
     private function require_admin_nonce() {
         if (!current_user_can('manage_woocommerce')) {
-            wp_send_json_error(array('message' => 'Permessi insufficienti'), 403);
+            wp_send_json_error(array('message' => __('You do not have permission to do that', 'mg-warehouse-stock')), 403);
         }
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mgws_admin_nonce')) {
-            wp_send_json_error(array('message' => 'Nonce non valido'), 400);
+            wp_send_json_error(array('message' => __('Invalid security token', 'mg-warehouse-stock')), 400);
         }
     }
 
@@ -1717,23 +1828,23 @@ class MGWS_Plugin {
         $nonces = is_array($nonces) ? $nonces : array();
         $val = isset($_POST['nonce']) ? (string) $_POST['nonce'] : '';
         if ($val === '') {
-            wp_send_json_error(array('message' => 'Nonce non valido'), 400);
+            wp_send_json_error(array('message' => __('Invalid security token', 'mg-warehouse-stock')), 400);
         }
         foreach ($nonces as $n) {
             if ($n && wp_verify_nonce($val, (string) $n)) {
                 return;
             }
         }
-        wp_send_json_error(array('message' => 'Nonce non valido'), 400);
+        wp_send_json_error(array('message' => __('Invalid security token', 'mg-warehouse-stock')), 400);
     }
 
     private function require_admin_delete_caps() {
         // Deletions are destructive: keep to admins.
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => 'Permessi insufficienti'), 403);
+            wp_send_json_error(array('message' => __('You do not have permission to do that', 'mg-warehouse-stock')), 403);
         }
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mgws_admin_nonce')) {
-            wp_send_json_error(array('message' => 'Nonce non valido'), 400);
+            wp_send_json_error(array('message' => __('Invalid security token', 'mg-warehouse-stock')), 400);
         }
     }
 
@@ -1770,29 +1881,29 @@ class MGWS_Plugin {
         $shelf = MGWS_DB::sanitize_loc((string) ($_POST['shelf'] ?? ''));
         $scope = sanitize_key((string) ($_POST['scope'] ?? ''));
         if ($warehouse_id <= 0 || $room === '' || $scope === '') {
-            wp_send_json_error(array('message' => 'Dati mancanti'), 400);
+            wp_send_json_error(array('message' => __('Missing data', 'mg-warehouse-stock')), 400);
         }
 
         if ($scope !== 'shelf_one') {
-            wp_send_json_error(array('message' => 'Consentito solo collegamento mensola'), 400);
+            wp_send_json_error(array('message' => __('Only shelf links are allowed here', 'mg-warehouse-stock')), 400);
         }
         if ($rack === '' || $shelf === '') {
-            wp_send_json_error(array('message' => 'Seleziona scaffale e mensola'), 400);
+            wp_send_json_error(array('message' => __('Select a rack and a shelf', 'mg-warehouse-stock')), 400);
         }
 
         $site_id = MGWS_DB::get_site_id_for_warehouse($warehouse_id);
         $site_limit = $this->get_user_site_limit(get_current_user_id());
         if ($site_limit > 0 && (int) $site_id !== (int) $site_limit) {
-            wp_send_json_error(array('message' => 'Magazzino fuori sede consentita'), 403);
+            wp_send_json_error(array('message' => __('Warehouse is outside your assigned site', 'mg-warehouse-stock')), 403);
         }
 
         if (!$this->site_tree_has_room_rack_shelf($site_id, $room, $rack, $shelf, $scope)) {
-            wp_send_json_error(array('message' => 'Ubicazione non presente nella struttura della sede'), 400);
+            wp_send_json_error(array('message' => __('Location not found in the site structure', 'mg-warehouse-stock')), 400);
         }
 
         $res = MGWS_DB::link_location_to_warehouse($warehouse_id, $room, $rack, $shelf, $scope);
         if (empty($res['ok'])) {
-            wp_send_json_error(array('message' => $res['message'] ?? 'Errore'), 400);
+            wp_send_json_error(array('message' => $res['message'] ?? __('Error', 'mg-warehouse-stock')), 400);
         }
         wp_send_json_success(array('wh_tree' => MGWS_DB::get_warehouse_location_tree($warehouse_id)));
     }
@@ -1806,18 +1917,18 @@ class MGWS_Plugin {
         $shelf = MGWS_DB::sanitize_loc((string) ($_POST['shelf'] ?? ''));
         $scope = sanitize_key((string) ($_POST['scope'] ?? ''));
         if ($warehouse_id <= 0 || $room === '' || $scope === '') {
-            wp_send_json_error(array('message' => 'Dati mancanti'), 400);
+            wp_send_json_error(array('message' => __('Missing data', 'mg-warehouse-stock')), 400);
         }
 
         $site_id = MGWS_DB::get_site_id_for_warehouse($warehouse_id);
         $site_limit = $this->get_user_site_limit(get_current_user_id());
         if ($site_limit > 0 && (int) $site_id !== (int) $site_limit) {
-            wp_send_json_error(array('message' => 'Magazzino fuori sede consentita'), 403);
+            wp_send_json_error(array('message' => __('Warehouse is outside your assigned site', 'mg-warehouse-stock')), 403);
         }
 
         $res = MGWS_DB::unlink_location_from_warehouse($warehouse_id, $room, $rack, $shelf, $scope);
         if (empty($res['ok'])) {
-            wp_send_json_error(array('message' => $res['message'] ?? 'Errore'), 400);
+            wp_send_json_error(array('message' => $res['message'] ?? __('Error', 'mg-warehouse-stock')), 400);
         }
         wp_send_json_success(array('wh_tree' => MGWS_DB::get_warehouse_location_tree($warehouse_id)));
     }
@@ -1827,24 +1938,31 @@ class MGWS_Plugin {
 
         $warehouse_id = isset($_POST['warehouse_id']) ? (int) $_POST['warehouse_id'] : 0;
         if ($warehouse_id <= 0) {
-            wp_send_json_error(array('message' => 'Magazzino non valido'), 400);
+            wp_send_json_error(array('message' => __('Invalid warehouse', 'mg-warehouse-stock')), 400);
         }
 
         $site_id = MGWS_DB::get_site_id_for_warehouse($warehouse_id);
         $site_limit = $this->get_user_site_limit(get_current_user_id());
         if ($site_limit > 0 && (int) $site_id !== (int) $site_limit) {
-            wp_send_json_error(array('message' => 'Magazzino fuori sede consentita'), 403);
+            wp_send_json_error(array('message' => __('Warehouse is outside your assigned site', 'mg-warehouse-stock')), 403);
         }
 
         $levels = MGWS_DB::count_levels_for_warehouse($warehouse_id);
         $moves = MGWS_DB::count_moves_for_warehouse($warehouse_id);
         if ($levels > 0 || $moves > 0) {
-            wp_send_json_error(array('message' => 'Impossibile eliminare: magazzino usato (livelli=' . (int) $levels . ', movimenti=' . (int) $moves . ')'), 409);
+            wp_send_json_error(array(
+                'code' => 'mgws_not_deletable',
+                'message' => sprintf(
+                    __('Cannot delete: warehouse is in use (levels=%1$d, movements=%2$d)', 'mg-warehouse-stock'),
+                    (int) $levels,
+                    (int) $moves
+                ),
+            ), 409);
         }
 
         $res = wp_delete_post($warehouse_id, true);
         if (!$res) {
-            wp_send_json_error(array('message' => 'Errore eliminazione magazzino'), 500);
+            wp_send_json_error(array('message' => __('Could not delete the warehouse', 'mg-warehouse-stock')), 500);
         }
         wp_send_json_success(array('ok' => true));
     }
@@ -1854,12 +1972,12 @@ class MGWS_Plugin {
 
         $site_id = isset($_POST['site_id']) ? (int) $_POST['site_id'] : 0;
         if ($site_id <= 0) {
-            wp_send_json_error(array('message' => 'Sede non valida'), 400);
+            wp_send_json_error(array('message' => __('Invalid site', 'mg-warehouse-stock')), 400);
         }
 
         $site_limit = $this->get_user_site_limit(get_current_user_id());
         if ($site_limit > 0 && (int) $site_id !== (int) $site_limit) {
-            wp_send_json_error(array('message' => 'Sede fuori sede consentita'), 403);
+            wp_send_json_error(array('message' => __('Site is outside your assigned site', 'mg-warehouse-stock')), 403);
         }
 
         $warehouses = get_posts(array(
@@ -1875,28 +1993,38 @@ class MGWS_Plugin {
             'fields' => 'ids',
         ));
         if (!empty($warehouses)) {
-            wp_send_json_error(array('message' => 'Impossibile eliminare: esistono magazzini nella sede'), 409);
+            wp_send_json_error(array(
+                'code' => 'mgws_not_deletable',
+                'message' => __('Cannot delete: the site still has warehouses', 'mg-warehouse-stock'),
+            ), 409);
         }
 
         $levels = MGWS_DB::count_levels_for_site($site_id);
         $moves = MGWS_DB::count_moves_for_site($site_id);
         if ($levels > 0 || $moves > 0) {
-            wp_send_json_error(array('message' => 'Impossibile eliminare: sede usata (livelli=' . (int) $levels . ', movimenti=' . (int) $moves . ')'), 409);
+            wp_send_json_error(array(
+                'code' => 'mgws_not_deletable',
+                'message' => sprintf(
+                    __('Cannot delete: site is in use (levels=%1$d, movements=%2$d)', 'mg-warehouse-stock'),
+                    (int) $levels,
+                    (int) $moves
+                ),
+            ), 409);
         }
 
         $res = wp_delete_post($site_id, true);
         if (!$res) {
-            wp_send_json_error(array('message' => 'Errore eliminazione sede'), 500);
+            wp_send_json_error(array('message' => __('Could not delete the site', 'mg-warehouse-stock')), 500);
         }
         wp_send_json_success(array('ok' => true));
     }
 
     public function ajax_apply_inventory_op() {
         if (!$this->can_move_stock_ajax()) {
-            wp_send_json_error(array('message' => 'Permessi insufficienti'), 403);
+            wp_send_json_error(array('message' => __('You do not have permission to do that', 'mg-warehouse-stock')), 403);
         }
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mgws_product_nonce')) {
-            wp_send_json_error(array('message' => 'Nonce non valido'), 400);
+            wp_send_json_error(array('message' => __('Invalid security token', 'mg-warehouse-stock')), 400);
         }
 
         $operation = isset($_POST['operation']) ? sanitize_key(wp_unslash($_POST['operation'])) : 'adjust';
@@ -1922,72 +2050,72 @@ class MGWS_Plugin {
         $site_limit = $this->get_user_site_limit(get_current_user_id());
         $wh_site = MGWS_DB::get_site_id_for_warehouse($warehouse_id);
         if ($warehouse_id <= 0 || $wh_site <= 0) {
-            wp_send_json_error(array('message' => 'Magazzino non valido'), 400);
+            wp_send_json_error(array('message' => __('Invalid warehouse', 'mg-warehouse-stock')), 400);
         }
         if ($site_limit > 0 && (int) $wh_site !== (int) $site_limit) {
-            wp_send_json_error(array('message' => 'Magazzino fuori sede consentita'), 403);
+            wp_send_json_error(array('message' => __('Warehouse is outside your assigned site', 'mg-warehouse-stock')), 403);
         }
 
         $user_id = get_current_user_id();
 
         if ($operation === 'adjust') {
             if ($qty < 0) {
-                wp_send_json_error(array('message' => 'Qty deve essere >= 0'), 400);
+                wp_send_json_error(array('message' => __('Quantity must be 0 or more', 'mg-warehouse-stock')), 400);
             }
             $old = MGWS_DB::get_level_row($warehouse_id, $product_id, $variation_id, $room, $rack, $shelf);
             $old_qty = (int) ($old['qty'] ?? 0);
             $res = MGWS_DB::upsert_level($warehouse_id, $product_id, $variation_id, $qty, $room, $rack, $shelf);
             if (!$res['ok']) {
-                wp_send_json_error(array('message' => $res['message'] ?? 'Errore'), 400);
+                wp_send_json_error(array('message' => $res['message'] ?? __('Error', 'mg-warehouse-stock')), 400);
             }
             $delta = (int) $qty - $old_qty;
             MGWS_DB::insert_move('adjust', (int) $wh_site, $warehouse_id, $product_id, $variation_id, $delta, $room, $rack, $shelf, $user_id, 0, 'Product adjust');
             $this->sync_woo_stock($product_id, $variation_id);
-            wp_send_json_success(array('message' => 'Aggiornato'));
+            wp_send_json_success(array('message' => __('Updated', 'mg-warehouse-stock')));
         }
 
         if ($operation === 'in') {
             if ($qty <= 0) {
-                wp_send_json_error(array('message' => 'Qty deve essere > 0'), 400);
+                wp_send_json_error(array('message' => __('Quantity must be greater than 0', 'mg-warehouse-stock')), 400);
             }
             $res = MGWS_DB::apply_delta_level($warehouse_id, $product_id, $variation_id, $qty, $room, $rack, $shelf);
             if (!$res['ok']) {
-                wp_send_json_error(array('message' => $res['message'] ?? 'Errore'), 409);
+                wp_send_json_error(array('message' => $res['message'] ?? __('Error', 'mg-warehouse-stock')), 409);
             }
             MGWS_DB::insert_move('in', (int) $wh_site, $warehouse_id, $product_id, $variation_id, $qty, $room, $rack, $shelf, $user_id, 0, 'Product in');
             $this->sync_woo_stock($product_id, $variation_id);
-            wp_send_json_success(array('message' => 'Carico registrato'));
+            wp_send_json_success(array('message' => __('Stock-in recorded', 'mg-warehouse-stock')));
         }
 
         if ($operation === 'out') {
             if ($qty <= 0) {
-                wp_send_json_error(array('message' => 'Qty deve essere > 0'), 400);
+                wp_send_json_error(array('message' => __('Quantity must be greater than 0', 'mg-warehouse-stock')), 400);
             }
             $res = MGWS_DB::apply_delta_level($warehouse_id, $product_id, $variation_id, -$qty, $room, $rack, $shelf);
             if (!$res['ok']) {
-                wp_send_json_error(array('message' => $res['message'] ?? 'Errore'), 409);
+                wp_send_json_error(array('message' => $res['message'] ?? __('Error', 'mg-warehouse-stock')), 409);
             }
             MGWS_DB::insert_move('out', (int) $wh_site, $warehouse_id, $product_id, $variation_id, $qty, $room, $rack, $shelf, $user_id, 0, 'Product out');
             $this->sync_woo_stock($product_id, $variation_id);
-            wp_send_json_success(array('message' => 'Scarico registrato'));
+            wp_send_json_success(array('message' => __('Stock-out recorded', 'mg-warehouse-stock')));
         }
 
         if ($operation === 'transfer') {
             if ($qty <= 0) {
-                wp_send_json_error(array('message' => 'Qty deve essere > 0'), 400);
+                wp_send_json_error(array('message' => __('Quantity must be greater than 0', 'mg-warehouse-stock')), 400);
             }
             if ($to_warehouse_id <= 0) {
-                wp_send_json_error(array('message' => 'Seleziona magazzino destinazione'), 400);
+                wp_send_json_error(array('message' => __('Select a destination warehouse', 'mg-warehouse-stock')), 400);
             }
             if ($to_warehouse_id === $warehouse_id) {
-                wp_send_json_error(array('message' => 'Magazzino sorgente e destinazione non possono coincidere'), 400);
+                wp_send_json_error(array('message' => __('Source and destination warehouse must be different', 'mg-warehouse-stock')), 400);
             }
             $to_site = MGWS_DB::get_site_id_for_warehouse($to_warehouse_id);
             if ($to_site <= 0) {
-                wp_send_json_error(array('message' => 'Destinazione non valida'), 400);
+                wp_send_json_error(array('message' => __('Invalid destination', 'mg-warehouse-stock')), 400);
             }
             if ($site_limit > 0 && (int) $to_site !== (int) $site_limit) {
-                wp_send_json_error(array('message' => 'Destinazione fuori sede consentita'), 403);
+                wp_send_json_error(array('message' => __('Destination is outside your assigned site', 'mg-warehouse-stock')), 403);
             }
 
             global $wpdb;
@@ -1995,26 +2123,26 @@ class MGWS_Plugin {
             $from_res = MGWS_DB::apply_delta_level($warehouse_id, $product_id, $variation_id, -$qty, $room, $rack, $shelf);
             if (!$from_res['ok']) {
                 $wpdb->query('ROLLBACK');
-                wp_send_json_error(array('message' => $from_res['message'] ?? 'Errore'), 409);
+                wp_send_json_error(array('message' => $from_res['message'] ?? __('Error', 'mg-warehouse-stock')), 409);
             }
             $to_res = MGWS_DB::apply_delta_level($to_warehouse_id, $product_id, $variation_id, $qty, $to_room, $to_rack, $to_shelf);
             if (!$to_res['ok']) {
                 $wpdb->query('ROLLBACK');
-                wp_send_json_error(array('message' => $to_res['message'] ?? 'Errore'), 409);
+                wp_send_json_error(array('message' => $to_res['message'] ?? __('Error', 'mg-warehouse-stock')), 409);
             }
 
             MGWS_DB::insert_move('out', (int) $wh_site, $warehouse_id, $product_id, $variation_id, $qty, $room, $rack, $shelf, $user_id, 0, 'Transfer out', $warehouse_id, $to_warehouse_id);
             MGWS_DB::insert_move('in', (int) $to_site, $to_warehouse_id, $product_id, $variation_id, $qty, $to_room, $to_rack, $to_shelf, $user_id, 0, 'Transfer in', $warehouse_id, $to_warehouse_id);
             $wpdb->query('COMMIT');
             $this->sync_woo_stock($product_id, $variation_id);
-            wp_send_json_success(array('message' => 'Trasferimento registrato'));
+            wp_send_json_success(array('message' => __('Transfer recorded', 'mg-warehouse-stock')));
         }
 
-        wp_send_json_error(array('message' => 'Operazione non valida'), 400);
+        wp_send_json_error(array('message' => __('Invalid operation', 'mg-warehouse-stock')), 400);
     }
 
     public function add_warehouse_metabox() {
-        add_meta_box('mgws_warehouse_site', 'Sede', array($this, 'render_warehouse_metabox'), 'mg_warehouse', 'side', 'high');
+        add_meta_box('mgws_warehouse_site', __('Site', 'mg-warehouse-stock'), array($this, 'render_warehouse_metabox'), 'mg_warehouse', 'side', 'high');
     }
 
     public function render_warehouse_metabox($post) {
@@ -2022,7 +2150,7 @@ class MGWS_Plugin {
         wp_nonce_field('mgws_wh_site_nonce', 'mgws_wh_site_nonce');
         $sites = get_posts(array('post_type' => 'mg_site', 'posts_per_page' => -1, 'orderby' => 'title', 'order' => 'ASC'));
         echo '<select name="mgws_site_id">';
-        echo '<option value="0">-- seleziona --</option>';
+        echo '<option value="0">' . esc_html__('-- select --', 'mg-warehouse-stock') . '</option>';
         foreach ($sites as $s) {
             $sel = $current === (int) $s->ID ? ' selected' : '';
             echo '<option value="' . esc_attr((int) $s->ID) . '"' . $sel . '>' . esc_html($s->post_title) . '</option>';
@@ -2053,17 +2181,17 @@ class MGWS_Plugin {
         if ($can_edit) {
             $current = (int) get_user_meta($user->ID, 'mg_default_site_id', true);
             $sites = get_posts(array('post_type' => 'mg_site', 'posts_per_page' => -1, 'orderby' => 'title', 'order' => 'ASC'));
-            echo '<h3>Magazzino</h3>';
+            echo '<h3>' . esc_html__('Warehouse', 'mg-warehouse-stock') . '</h3>';
             echo '<table class="form-table" role="presentation">';
-            echo '<tr><th><label for="mg_default_site_id">Sede predefinita</label></th><td>';
+            echo '<tr><th><label for="mg_default_site_id">' . esc_html__('Default site', 'mg-warehouse-stock') . '</label></th><td>';
             echo '<select name="mg_default_site_id" id="mg_default_site_id">';
-            echo '<option value="0">(Globale)</option>';
+            echo '<option value="0">' . esc_html__('(All)', 'mg-warehouse-stock') . '</option>';
             foreach ($sites as $s) {
                 $sel = $current === (int) $s->ID ? ' selected' : '';
                 echo '<option value="' . esc_attr((int) $s->ID) . '"' . $sel . '>' . esc_html($s->post_title) . '</option>';
             }
             echo '</select>';
-            echo '<p class="description">Se impostata, limita l\'utente a una sola sede.</p>';
+            echo '<p class="description">' . esc_html__('When set, limits the user to a single site.', 'mg-warehouse-stock') . '</p>';
             echo '</td></tr></table>';
         }
     }

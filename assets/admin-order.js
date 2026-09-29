@@ -11,7 +11,7 @@
   function renderTree(data) {
     var html = '';
     if (!data.sites || data.sites.length === 0) {
-      return '<p>Nessuna disponibilita trovata (qty >= 1).</p>';
+      return '<p>' + wp.i18n.__('No availability found (qty >= 1).', 'mg-warehouse-stock') + '</p>';
     }
     data.sites.forEach(function (site) {
       html += '<div class="mgws-site" data-site-id="' + esc(site.site_id) + '">';
@@ -24,14 +24,14 @@
           var warn = card.available_total_qty < card.required_qty;
           html += '<div class="mgws-card" data-card-key="' + esc(cardKey) + '" data-product-id="' + esc(card.product_id) + '" data-variation-id="' + esc(card.variation_id) + '">';
           html += '<div class="mgws-card-title">' + esc(card.title) + '</div>';
-          html += '<div>Richiesti: <strong class="mgws-required">' + esc(card.required_qty) + '</strong> | Disponibili totali: <strong>' + esc(card.available_total_qty) + '</strong> | In questo magazzino: <strong>' + esc(card.available_in_warehouse_qty) + '</strong>';
+          html += '<div>' + wp.i18n.__('Required:', 'mg-warehouse-stock') + ' <strong class="mgws-required">' + esc(card.required_qty) + '</strong> | ' + wp.i18n.__('Total available:', 'mg-warehouse-stock') + ' <strong>' + esc(card.available_total_qty) + '</strong> | ' + wp.i18n.__('In this warehouse:', 'mg-warehouse-stock') + ' <strong>' + esc(card.available_in_warehouse_qty) + '</strong>';
           if (warn) {
-            html += ' <span class="mgws-warning">(Insufficiente)</span>';
+            html += ' <span class="mgws-warning">' + wp.i18n.__('(Not enough)', 'mg-warehouse-stock') + '</span>';
           }
           html += '</div>';
 
           html += '<table class="mgws-locations">';
-          html += '<thead><tr><th>Posizione</th><th>Disponibile</th><th>Priorita</th><th>Preleva</th></tr></thead>';
+          html += '<thead><tr><th>' + wp.i18n.__('Location', 'mg-warehouse-stock') + '</th><th>' + wp.i18n.__('Available', 'mg-warehouse-stock') + '</th><th>' + wp.i18n.__('Priority', 'mg-warehouse-stock') + '</th><th>' + wp.i18n.__('Pick', 'mg-warehouse-stock') + '</th></tr></thead>';
           html += '<tbody>';
           card.locations.forEach(function (loc, idx) {
             html += '<tr class="mgws-loc" data-card-key="' + esc(cardKey) + '" data-site-id="' + esc(site.site_id) + '" data-warehouse-id="' + esc(wh.warehouse_id) + '" data-room="' + esc(loc.room) + '" data-rack="' + esc(loc.rack) + '" data-shelf="' + esc(loc.shelf) + '" data-available="' + esc(loc.qty) + '">';
@@ -42,7 +42,7 @@
             html += '</tr>';
           });
           html += '</tbody></table>';
-          html += '<p style="margin:6px 0 0;"><button type="button" class="button mgws-autofill" data-card-key="' + esc(cardKey) + '">Auto</button> <span class="mgws-card-status" data-card-key="' + esc(cardKey) + '"></span></p>';
+          html += '<p style="margin:6px 0 0;"><button type="button" class="button mgws-autofill" data-card-key="' + esc(cardKey) + '">' + wp.i18n.__('Auto', 'mg-warehouse-stock') + '</button> <span class="mgws-card-status" data-card-key="' + esc(cardKey) + '"></span></p>';
           html += '</div>';
         });
         html += '</div>';
@@ -84,7 +84,7 @@
     Object.keys(cards).forEach(function (k) {
       var c = cards[k];
       var remaining = Math.max(0, c.required - c.allocated);
-      var txt = 'Allocati: ' + c.allocated + ' | Mancano: ' + remaining;
+      var txt = wp.i18n.__('Allocated:', 'mg-warehouse-stock') + ' ' + c.allocated + ' | ' + wp.i18n.__('Missing:', 'mg-warehouse-stock') + ' ' + remaining;
       if (remaining > 0) {
         txt = '<span class="mgws-warning">' + esc(txt) + '</span>';
       } else {
@@ -95,7 +95,7 @@
 
     var remainingAll = Math.max(0, totalsRequired - totalsAllocated);
     $('#mgws-totals').html(
-      'Totale richiesti: <strong>' + totalsRequired + '</strong> | Totale prelevati: <strong>' + totalsAllocated + '</strong> | Mancano: <strong>' + remainingAll + '</strong>'
+      wp.i18n.__('Total required:', 'mg-warehouse-stock') + ' <strong>' + totalsRequired + '</strong> | ' + wp.i18n.__('Total picked:', 'mg-warehouse-stock') + ' <strong>' + totalsAllocated + '</strong> | ' + wp.i18n.__('Missing:', 'mg-warehouse-stock') + ' <strong data-mgws-remaining="' + remainingAll + '">' + remainingAll + '</strong>'
     );
 
     $('#mgws-commit').prop('disabled', totalsRequired === 0);
@@ -177,12 +177,12 @@
     var $root = $('#mgws-accept');
     var orderId = parseInt($root.data('order-id'), 10) || 0;
     var nonce = $('#mgws_accept_nonce').val();
-    $('#mgws-msg').text('Caricamento...');
+    $('#mgws-msg').text(wp.i18n.__('Loading...', 'mg-warehouse-stock'));
     $('#mgws-commit').prop('disabled', true);
     $.post(MGWS.ajaxUrl, { action: 'mgws_get_accept_tree', order_id: orderId, nonce: nonce })
       .done(function (resp) {
         if (!resp || !resp.success) {
-          $('#mgws-msg').text(resp && resp.data && resp.data.message ? resp.data.message : 'Errore');
+          $('#mgws-msg').text(resp && resp.data && resp.data.message ? resp.data.message : wp.i18n.__('Error', 'mg-warehouse-stock'));
           return;
         }
         $('#mgws-tree').html(renderTree(resp.data));
@@ -190,7 +190,7 @@
         recompute();
       })
       .fail(function () {
-        $('#mgws-msg').text('Errore richiesta');
+        $('#mgws-msg').text(wp.i18n.__('Request failed', 'mg-warehouse-stock'));
       });
   });
 
@@ -210,29 +210,31 @@
     var nonce = $('#mgws_accept_nonce').val();
     var payload = buildPayload();
 
-    var totalsText = $('#mgws-totals').text();
-    var match = totalsText.match(/Mancano:\s*(\d+)/);
-    var remaining = match ? parseInt(match[1], 10) : 0;
+    // Read the count from the data attribute, not from the rendered text. The
+    // label next to it is translatable, and a regex over it would stop matching
+    // the moment the interface is not in English: the confirmation below would
+    // quietly stop appearing.
+    var remaining = parseInt($('#mgws-totals [data-mgws-remaining]').attr('data-mgws-remaining'), 10) || 0;
     if (remaining > 0) {
-      if (!window.confirm('Prodotto non del tutto disponibile. Vuoi continuare?')) {
+      if (!window.confirm(wp.i18n.__('Product not fully available. Do you want to continue?', 'mg-warehouse-stock'))) {
         return;
       }
     }
 
-    $('#mgws-msg').text('Salvataggio...');
+    $('#mgws-msg').text(wp.i18n.__('Saving...', 'mg-warehouse-stock'));
     $('#mgws-commit').prop('disabled', true);
     $.post(MGWS.ajaxUrl, { action: 'mgws_commit_accept', order_id: orderId, nonce: nonce, payload: JSON.stringify(payload) })
       .done(function (resp) {
         if (!resp || !resp.success) {
-          $('#mgws-msg').text(resp && resp.data && resp.data.message ? resp.data.message : 'Errore');
+          $('#mgws-msg').text(resp && resp.data && resp.data.message ? resp.data.message : wp.i18n.__('Error', 'mg-warehouse-stock'));
           $('#mgws-commit').prop('disabled', false);
           return;
         }
-        $('#mgws-msg').text(resp.data && resp.data.message ? resp.data.message : 'OK');
+        $('#mgws-msg').text(resp.data && resp.data.message ? resp.data.message : wp.i18n.__('Done', 'mg-warehouse-stock'));
         window.location.reload();
       })
       .fail(function () {
-        $('#mgws-msg').text('Errore richiesta');
+        $('#mgws-msg').text(wp.i18n.__('Request failed', 'mg-warehouse-stock'));
         $('#mgws-commit').prop('disabled', false);
       });
   });

@@ -558,7 +558,7 @@ class MGWS_REST_API {
             $site_id = (int) $site_id;
             return array(
                 'id' => $site_id,
-                'name' => function_exists('get_the_title') ? (string) get_the_title($site_id) : ('Sede ' . $site_id),
+                'name' => function_exists('get_the_title') ? (string) get_the_title($site_id) : (__('Site', 'mg-warehouse-stock') . ' ' . $site_id),
                 'active' => true,
             );
         }, is_array($ids) ? $ids : array()));
@@ -583,7 +583,7 @@ class MGWS_REST_API {
             return array(
                 'id' => $warehouse_id,
                 'site_id' => (int) get_post_meta($warehouse_id, 'mg_site_id', true),
-                'name' => function_exists('get_the_title') ? (string) get_the_title($warehouse_id) : ('Magazzino ' . $warehouse_id),
+                'name' => function_exists('get_the_title') ? (string) get_the_title($warehouse_id) : (__('Warehouse', 'mg-warehouse-stock') . ' ' . $warehouse_id),
                 'active' => true,
             );
         }, is_array($ids) ? $ids : array()));
@@ -3552,12 +3552,12 @@ class MGWS_REST_API {
         $from_res = MGWS_DB::apply_delta_level($from_warehouse_id, $product_id, $variation_id, -$quantity, $from_level['room'], $from_level['rack'], $from_level['shelf']);
         if (empty($from_res['ok'])) {
             $wpdb->query('ROLLBACK');
-            return new WP_Error('mgws_conflict', (string) ($from_res['message'] ?? 'Stock insufficiente nel magazzino di partenza'), array('status' => 409));
+            return new WP_Error('mgws_conflict', (string) ($from_res['message'] ?? __('Not enough stock in the source warehouse', 'mg-warehouse-stock')), array('status' => 409));
         }
         $to_res = MGWS_DB::apply_delta_level($to_warehouse_id, $product_id, $variation_id, $quantity, $to_level['room'], $to_level['rack'], $to_level['shelf']);
         if (empty($to_res['ok'])) {
             $wpdb->query('ROLLBACK');
-            return new WP_Error('mgws_conflict', (string) ($to_res['message'] ?? 'Impossibile registrare l\'entrata nel magazzino di destinazione'), array('status' => 409));
+            return new WP_Error('mgws_conflict', (string) ($to_res['message'] ?? __('Could not record the entry into the destination warehouse', 'mg-warehouse-stock')), array('status' => 409));
         }
 
         $audit_reason = $reason !== '' ? $reason : 'No reason provided';
@@ -4414,9 +4414,12 @@ class MGWS_REST_API {
         update_post_meta($order_id, '_mgws_accept_committed_by', $user_id);
         update_post_meta($order_id, '_mgws_allocation_v1', wp_json_encode($allocation_audit));
 
-        $note = 'Ordine accettato (API).';
+        $note = __('Order accepted (API).', 'mg-warehouse-stock');
         if ($allocation_audit['totals']['total_remaining'] > 0) {
-            $note .= ' Attenzione: stock insufficiente per ' . (int) $allocation_audit['totals']['total_remaining'] . ' unita.';
+            $note .= ' ' . sprintf(
+                __('Warning: not enough stock for %d units.', 'mg-warehouse-stock'),
+                (int) $allocation_audit['totals']['total_remaining']
+            );
         }
         $order->add_order_note($note, false, true);
         $order->update_status('mg-accepted');
@@ -4502,10 +4505,10 @@ class MGWS_REST_API {
                 $pos_shift_row = MGWS_DB::get_pos_shift_by_key($pos_shift_key);
             }
             if (!is_array($pos_shift_row)) {
-                return new WP_Error('mgws_shift_not_found', 'Shift not found: open a turno from the POS before checking out', array('status' => 409));
+                return new WP_Error('mgws_shift_not_found', 'Shift not found: open a shift from the POS before checking out', array('status' => 409));
             }
             if (($pos_shift_row['status'] ?? '') !== 'open') {
-                return new WP_Error('mgws_shift_closed', 'Shift is closed: open a new turno before checking out', array('status' => 409));
+                return new WP_Error('mgws_shift_closed', 'Shift is closed: open a new shift before checking out', array('status' => 409));
             }
             $pos_shift_id = (int) $pos_shift_row['id'];
         }
@@ -4644,12 +4647,12 @@ class MGWS_REST_API {
                         ));
                         if ((int) $updated !== 1) {
                             $wpdb->query('ROLLBACK');
-                            throw new Exception('Stock insufficiente o cambiato durante il checkout');
+                            throw new Exception(__('Stock ran out or changed during checkout', 'mg-warehouse-stock'));
                         }
 
                         if (!MGWS_DB::insert_move('out', (int) $allocation['site_id'], (int) $allocation['warehouse_id'], (int) $step['product_id'], (int) $step['variation_id'], (int) $allocation['use_qty'], (string) $allocation['room'], (string) $allocation['rack'], (string) $allocation['shelf'], get_current_user_id(), $order_id, 'POS checkout', (int) $allocation['warehouse_id'], 0)) {
                             $wpdb->query('ROLLBACK');
-                            throw new Exception('Impossibile registrare il movimento di uscita');
+                            throw new Exception(__('Could not record the outgoing movement', 'mg-warehouse-stock'));
                         }
                     }
                     continue;
@@ -4661,13 +4664,13 @@ class MGWS_REST_API {
                 if (is_array($delta_result) && !empty($delta_result['ok'])) {
                     if (!MGWS_DB::insert_move('in', (int) $location['site_id'], (int) $location['warehouse_id'], (int) $step['product_id'], (int) $step['variation_id'], $delta, (string) $location['room'], (string) $location['rack'], (string) $location['shelf'], get_current_user_id(), $order_id, 'POS return', 0, (int) $location['warehouse_id'])) {
                         $wpdb->query('ROLLBACK');
-                        throw new Exception('Impossibile registrare il movimento di entrata');
+                        throw new Exception(__('Could not record the incoming movement', 'mg-warehouse-stock'));
                     }
                     continue;
                 }
 
                 $wpdb->query('ROLLBACK');
-                throw new Exception((string) ($delta_result['message'] ?? 'Impossibile registrare il reso'));
+                throw new Exception((string) ($delta_result['message'] ?? __('Could not record the return', 'mg-warehouse-stock')));
             }
 
             $wpdb->query('COMMIT');

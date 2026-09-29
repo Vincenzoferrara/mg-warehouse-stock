@@ -76,6 +76,42 @@ function register_activation_hook(string $file, mixed $callback): void {
     $GLOBALS['mgws_test_activation_hook'] = array($file, $callback);
 }
 
+function register_uninstall_hook(string $file, mixed $callback): void {
+    $GLOBALS['mgws_test_uninstall_hook'] = array($file, $callback);
+}
+
+// The gettext family, with the behaviour WordPress actually has: with no
+// catalogue loaded, __() hands back the source string untouched. The source is
+// English, so a test asserting on it asserts on the plugin's own wording. A
+// test that loaded a real .mo would be testing a translation instead.
+
+function __(string $text, string $domain = 'default'): string {
+    return $text;
+}
+
+function esc_html__(string $text, string $domain = 'default'): string {
+    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+}
+
+function esc_attr__(string $text, string $domain = 'default'): string {
+    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+}
+
+function _x(string $text, string $context, string $domain = 'default'): string {
+    return $text;
+}
+
+function _n_noop(string $singular, string $plural, ?string $domain = null): array {
+    return array(
+        0 => $singular,
+        1 => $plural,
+        'singular' => $singular,
+        'plural' => $plural,
+        'context' => null,
+        'domain' => $domain,
+    );
+}
+
 function register_rest_route(string $namespace, string $route, array $definition): bool {
     $GLOBALS['mgws_test_routes'][$namespace][$route] = $definition;
     return true;
@@ -2204,6 +2240,42 @@ function mgws_contract_tests(MGWS_REST_API $api): array {
 
                 $GLOBALS['mgws_test_capabilities'] = array('mgws_stock_move' => true);
                 mgws_contract_assert($api->perm_pos_checkout() === true, 'mgws_stock_move must permit POS checkout');
+            },
+        ),
+        array(
+            'name' => 'woocommerce_stock_authority',
+            'description' => 'WooCommerce stock reduction is left alone unless the store explicitly makes MGWS its single stock authority',
+            'run' => static function (): void {
+                $option = MGWS_Plugin::OPTION_WOOCOMMERCE_STOCK_AUTHORITY;
+                unset($GLOBALS['mgws_test_options'][$option]);
+
+                mgws_contract_assert(
+                    MGWS_Plugin::filter_can_reduce_order_stock(true, null) === true,
+                    'a fresh install must leave WooCommerce stock reduction enabled: suppressing it site-wide breaks every other stock plugin'
+                );
+                mgws_contract_assert(
+                    MGWS_Plugin::filter_can_reduce_order_stock(false, null) === false,
+                    'the filter must not force reduction on when something upstream already refused it'
+                );
+
+                $GLOBALS['mgws_test_options'][$option] = '1';
+                mgws_contract_assert(
+                    MGWS_Plugin::filter_can_reduce_order_stock(true, null) === false,
+                    'opting in must suppress WooCommerce stock reduction so stock is not decremented twice'
+                );
+
+                $GLOBALS['mgws_test_options'][$option] = '0';
+                mgws_contract_assert(
+                    MGWS_Plugin::filter_can_reduce_order_stock(true, null) === true,
+                    'opting back out must restore WooCommerce stock reduction'
+                );
+                unset($GLOBALS['mgws_test_options'][$option]);
+
+                $source = (string) file_get_contents(dirname(__DIR__) . '/includes/class-mgws-plugin.php');
+                mgws_contract_assert(
+                    !str_contains($source, "'woocommerce_can_reduce_order_stock', '__return_false'"),
+                    'the site-wide __return_false on WooCommerce stock reduction must not come back'
+                );
             },
         ),
         array(

@@ -75,7 +75,7 @@
     html += '  <div class="mgws-modal-dialog" role="dialog" aria-modal="true">';
     html += '    <div class="mgws-modal-header">';
     html += '      <h2 id="mgws-modal-title" style="margin:0;"></h2>';
-    html += '      <button type="button" class="button-link" id="mgws-modal-close">Chiudi</button>';
+    html += '      <button type="button" class="button-link" id="mgws-modal-close">' + wp.i18n.__('Close', 'mg-warehouse-stock') + '</button>';
     html += '    </div>';
     html += '    <div class="mgws-modal-body">';
     html += '      <label id="mgws-modal-label" for="mgws-modal-input" style="display:block; margin-bottom:6px;"></label>';
@@ -84,8 +84,8 @@
     html += '      <div id="mgws-modal-err" class="mgws-err" style="margin-top:6px;"></div>';
     html += '    </div>';
     html += '    <div class="mgws-modal-footer">';
-    html += '      <button type="button" class="button button-primary" id="mgws-modal-ok">Salva</button>';
-    html += '      <button type="button" class="button" id="mgws-modal-cancel">Annulla</button>';
+    html += '      <button type="button" class="button button-primary" id="mgws-modal-ok">' + wp.i18n.__('Save', 'mg-warehouse-stock') + '</button>';
+    html += '      <button type="button" class="button" id="mgws-modal-cancel">' + wp.i18n.__('Cancel', 'mg-warehouse-stock') + '</button>';
     html += '    </div>';
     html += '  </div>';
     html += '</div>';
@@ -225,7 +225,7 @@
     currentSubmit = function () {
       var v = String($('#mgws-modal-input').val() || '').trim();
       if (!v) {
-        $('#mgws-modal-err').text('Inserisci un valore');
+        $('#mgws-modal-err').text(wp.i18n.__('Enter a value', 'mg-warehouse-stock'));
         return;
       }
       $('#mgws-modal-input').prop('disabled', true);
@@ -476,7 +476,7 @@
 
       warehousesCache[String(sid)] = resp.data.warehouses || [];
 
-      var opts = '<option value="0">-- seleziona --</option>';
+      var opts = '<option value="0">' + wp.i18n.__('-- select --', 'mg-warehouse-stock') + '</option>';
       (warehousesCache[String(sid)] || []).forEach(function (w) {
         opts += '<option value="' + esc(w.id) + '">' + esc(w.name) + '</option>';
       });
@@ -566,12 +566,12 @@
     var $row = $btn.closest('.mgws-var-row');
 
     if (action === 'create_site') {
-      var name = window.prompt('Nome sede');
+      var name = window.prompt(wp.i18n.__('Site name', 'mg-warehouse-stock'));
       if (!name) return;
       $.post(MGWS_PRODUCT.ajaxUrl, { action: 'mgws_create_site', nonce: ctx.nonce, name: name })
         .done(function (resp) {
           if (!resp || !resp.success) {
-            setMsg((resp && resp.data && resp.data.message) ? resp.data.message : 'Errore', false);
+            setMsg((resp && resp.data && resp.data.message) ? resp.data.message : wp.i18n.__('Error', 'mg-warehouse-stock'), false);
             return;
           }
           var s = resp.data.site;
@@ -611,15 +611,15 @@
       }
 
       if (!siteId) {
-        setMsg('Seleziona prima una sede', false);
+        setMsg(wp.i18n.__('Select a site first', 'mg-warehouse-stock'), false);
         return;
       }
-      var wname = window.prompt('Nome magazzino');
+      var wname = window.prompt(wp.i18n.__('Warehouse name', 'mg-warehouse-stock'));
       if (!wname) return;
       $.post(MGWS_PRODUCT.ajaxUrl, { action: 'mgws_create_warehouse', nonce: ctx.nonce, site_id: siteId, name: wname })
         .done(function (resp) {
           if (!resp || !resp.success) {
-            setMsg((resp && resp.data && resp.data.message) ? resp.data.message : 'Errore', false);
+            setMsg((resp && resp.data && resp.data.message) ? resp.data.message : wp.i18n.__('Error', 'mg-warehouse-stock'), false);
             return;
           }
           var wid = resp.data && resp.data.warehouse ? parseInt(resp.data.warehouse.id, 10) || 0 : 0;
@@ -646,14 +646,14 @@
       }
 
       if (!warehouseId) {
-        setMsg('Seleziona prima un magazzino', false);
+        setMsg(wp.i18n.__('Select a warehouse first', 'mg-warehouse-stock'), false);
         return;
       }
 
       if (field === 'rack') {
         parentRoom = $row.length ? String($row.find('.mgws-var-room').val() || '') : String($('#mgws-default-room').val() || '');
         if (!parentRoom) {
-          setMsg('Seleziona prima una stanza', false);
+          setMsg(wp.i18n.__('Select a room first', 'mg-warehouse-stock'), false);
           return;
         }
       }
@@ -661,20 +661,39 @@
         parentRoom = $row.length ? String($row.find('.mgws-var-room').val() || '') : String($('#mgws-default-room').val() || '');
         parentRack = $row.length ? String($row.find('.mgws-var-rack').val() || '') : String($('#mgws-default-rack').val() || '');
         if (!parentRoom || !parentRack) {
-          setMsg('Seleziona prima stanza e scaffale', false);
+          setMsg(wp.i18n.__('Select a room and a rack first', 'mg-warehouse-stock'), false);
           return;
         }
       }
 
-      var label = (field === 'room') ? 'Stanza' : (field === 'rack') ? 'Scaffale' : 'Mensola';
+      var label = (field === 'room')
+        ? wp.i18n.__('Room', 'mg-warehouse-stock')
+        : (field === 'rack')
+          ? wp.i18n.__('Rack', 'mg-warehouse-stock')
+          : wp.i18n.__('Shelf', 'mg-warehouse-stock');
       var extra = '';
       if (field === 'rack' && parentRoom) {
-        extra = ' (Stanza: ' + parentRoom + ')';
+        // The whole "label: value" pair is one translatable string. Passing the
+        // format skeleton to sprintf outside wp.i18n.__ would lock the word order
+        // and the colon to English, and no translator could move them. The
+        // leading space stays outside the string: it is a layout separator, not
+        // part of the sentence.
+        extra = ' ' + wp.i18n.sprintf(
+          wp.i18n.__('(%s: %s)', 'mg-warehouse-stock'),
+          wp.i18n.__('Room', 'mg-warehouse-stock'),
+          parentRoom
+        );
       }
       if (field === 'shelf' && parentRoom && parentRack) {
-        extra = ' (Stanza: ' + parentRoom + ' / Scaffale: ' + parentRack + ')';
+        extra = ' ' + wp.i18n.sprintf(
+          wp.i18n.__('(%s: %s / %s: %s)', 'mg-warehouse-stock'),
+          wp.i18n.__('Room', 'mg-warehouse-stock'),
+          parentRoom,
+          wp.i18n.__('Rack', 'mg-warehouse-stock'),
+          parentRack
+        );
       }
-      var val = window.prompt('Nuovo ' + label + extra);
+      var val = window.prompt(wp.i18n.__('New', 'mg-warehouse-stock') + ' ' + label + extra);
       if (!val) return;
 
       $.post(MGWS_PRODUCT.ajaxUrl, {
@@ -687,7 +706,7 @@
         parent_rack: parentRack
       }).done(function (resp) {
         if (!resp || !resp.success) {
-          setMsg((resp && resp.data && resp.data.message) ? resp.data.message : 'Errore', false);
+          setMsg((resp && resp.data && resp.data.message) ? resp.data.message : wp.i18n.__('Error', 'mg-warehouse-stock'), false);
           return;
         }
         suggestionCache[String(warehouseId)] = resp.data;
@@ -776,7 +795,7 @@
     });
 
     scheduleEnhancedInit();
-    setMsg('Valori copiati (solo UI). Salva il prodotto per confermare.', true);
+    setMsg(wp.i18n.__('Values were copied to the interface only. Save the product to confirm.', 'mg-warehouse-stock'), true);
   }
 
   $(function () {

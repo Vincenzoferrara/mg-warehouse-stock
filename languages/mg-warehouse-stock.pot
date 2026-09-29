@@ -1,0 +1,895 @@
+# Translation template for the MG Warehouse Stock plugin.
+# Copyright (C) 2026 Vincenzo Ferrara
+# This file is distributed under the same license as the plugin.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: MG Warehouse Stock 2.3.0\n"
+"Report-Msgid-Bugs-To: https://github.com/Vincenzoferrara/mg-warehouse-stock/issues\n"
+"POT-Creation-Date: 2026-09-29 16:53+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"X-Domain: mg-warehouse-stock\n"
+
+
+#: assets/admin-product.js:689
+#, php-format
+msgid "(%s: %s / %s: %s)"
+msgstr ""
+
+#: assets/admin-product.js:682
+#, php-format
+msgid "(%s: %s)"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2188
+msgid "(All)"
+msgstr ""
+
+#: assets/admin-order.js:29
+msgid "(Not enough)"
+msgstr ""
+
+#: assets/admin-masterdata.js:408
+msgid "+ Rack"
+msgstr ""
+
+#: assets/admin-masterdata.js:363
+msgid "+ Room"
+msgstr ""
+
+#: assets/admin-masterdata.js:422
+msgid "+ Shelf"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:226
+msgid "+ Site"
+msgstr ""
+
+#: assets/admin-masterdata.js:362
+msgid "+ Warehouse"
+msgstr ""
+
+#: assets/admin-product.js:479 includes/class-mgws-plugin.php:2153 includes/class-mgws-plugin.php:362
+msgid "-- select --"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:489
+msgid "Accept order"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:406
+#, php-format
+msgid "Accepted <span class=\"count\">(%s)</span>"
+msgid_plural "Accepted <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/admin-order.js:87
+msgid "Allocated:"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1276
+msgid "Allocation is outside your assigned site"
+msgstr ""
+
+#: assets/admin-order.js:45
+msgid "Auto"
+msgstr ""
+
+#: assets/admin-order.js:34
+msgid "Available"
+msgstr ""
+
+#: assets/admin-masterdata.js:38 assets/admin-product.js:88
+msgid "Cancel"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1772
+#, php-format
+msgid "Cannot delete: linked to %d warehouses"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2008
+#, php-format
+msgid "Cannot delete: site is in use (levels=%1$d, movements=%2$d)"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1998
+msgid "Cannot delete: the site still has warehouses"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1783
+#, php-format
+msgid "Cannot delete: used by %d stock levels"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1956
+#, php-format
+msgid "Cannot delete: warehouse is in use (levels=%1$d, movements=%2$d)"
+msgstr ""
+
+#: assets/admin-masterdata.js:28 assets/admin-product.js:78
+msgid "Close"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:230
+msgid "Collapse"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:624
+msgid "Copy default to empty"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1512
+msgid "Could not create the site"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1542
+msgid "Could not create the warehouse"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2017
+msgid "Could not delete the site"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1965
+msgid "Could not delete the warehouse"
+msgstr ""
+
+#: includes/class-mgws-rest-api.php:3560
+msgid "Could not record the entry into the destination warehouse"
+msgstr ""
+
+#: includes/class-mgws-rest-api.php:4667
+msgid "Could not record the incoming movement"
+msgstr ""
+
+#: includes/class-mgws-rest-api.php:4655
+msgid "Could not record the outgoing movement"
+msgstr ""
+
+#: includes/class-mgws-rest-api.php:4673
+msgid "Could not record the return"
+msgstr ""
+
+#: includes/mgws-db.php:3061
+msgid "Could not save the movement"
+msgstr ""
+
+#: includes/mgws-db.php:2466 includes/mgws-db.php:2826
+msgid "Could not write the stock level"
+msgstr ""
+
+#: assets/admin-masterdata.js:495
+msgid "Create a new site."
+msgstr ""
+
+#: includes/class-mgws-plugin.php:535
+msgid "Default location"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:542
+msgid "Default location not set."
+msgstr ""
+
+#: includes/class-mgws-plugin.php:618
+msgid "Default location per variation"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2186
+msgid "Default site"
+msgstr ""
+
+#: assets/admin-masterdata.js:409 assets/admin-masterdata.js:423
+msgid "Delete"
+msgstr ""
+
+#: assets/admin-masterdata.js:364
+msgid "Delete site"
+msgstr ""
+
+#: assets/admin-masterdata.js:619
+#, php-format
+msgid "Delete the rack \"%s\"?"
+msgstr ""
+
+#: assets/admin-masterdata.js:617
+#, php-format
+msgid "Delete the room \"%s\"?"
+msgstr ""
+
+#: assets/admin-masterdata.js:620
+#, php-format
+msgid "Delete the shelf \"%s\"?"
+msgstr ""
+
+#: assets/admin-masterdata.js:823
+msgid "Delete this site?"
+msgstr ""
+
+#: assets/admin-masterdata.js:797
+msgid "Delete this warehouse?"
+msgstr ""
+
+#: assets/admin-masterdata.js:374
+msgid "Delete warehouse"
+msgstr ""
+
+#: assets/admin-masterdata.js:642
+msgid "Deleted"
+msgstr ""
+
+#: assets/admin-masterdata.js:625 assets/admin-masterdata.js:798 assets/admin-masterdata.js:824
+msgid "Deleting..."
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2118
+msgid "Destination is outside your assigned site"
+msgstr ""
+
+#: assets/admin-order.js:233
+msgid "Done"
+msgstr ""
+
+#: assets/admin-masterdata.js:577
+msgid "Enter a rack name"
+msgstr ""
+
+#: assets/admin-masterdata.js:575
+msgid "Enter a room name"
+msgstr ""
+
+#: assets/admin-masterdata.js:578
+msgid "Enter a shelf name"
+msgstr ""
+
+#: assets/admin-masterdata.js:75 assets/admin-product.js:228
+msgid "Enter a value"
+msgstr ""
+
+#: assets/admin-masterdata.js:450 assets/admin-masterdata.js:500 assets/admin-masterdata.js:530 assets/admin-masterdata.js:592 assets/admin-masterdata.js:637 assets/admin-masterdata.js:751 assets/admin-masterdata.js:783 assets/admin-masterdata.js:802 assets/admin-masterdata.js:828 assets/admin-order.js:185 assets/admin-order.js:229 assets/admin-product.js:574 assets/admin-product.js:622 assets/admin-product.js:709 includes/class-mgws-plugin.php:1791 includes/class-mgws-plugin.php:1906 includes/class-mgws-plugin.php:1931 includes/class-mgws-plugin.php:2069 includes/class-mgws-plugin.php:2083 includes/class-mgws-plugin.php:2096 includes/class-mgws-plugin.php:2126 includes/class-mgws-plugin.php:2131
+msgid "Error"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:229
+msgid "Expand"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:623
+msgid "Filter variations..."
+msgstr ""
+
+#: assets/admin-order.js:27
+msgid "In this warehouse:"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2115
+msgid "Invalid destination"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1650 includes/mgws-db.php:107
+msgid "Invalid field"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2141
+msgid "Invalid operation"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1078 includes/class-mgws-plugin.php:1219
+msgid "Invalid order"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1230
+msgid "Invalid payload"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1005 includes/class-mgws-plugin.php:1041 includes/class-mgws-plugin.php:1061
+msgid "Invalid product"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:508
+msgid "Invalid product."
+msgstr ""
+
+#: includes/mgws-db.php:96
+msgid "Invalid rack"
+msgstr ""
+
+#: includes/mgws-db.php:85
+msgid "Invalid room"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1072 includes/class-mgws-plugin.php:1213 includes/class-mgws-plugin.php:1408 includes/class-mgws-plugin.php:1554 includes/class-mgws-plugin.php:1823 includes/class-mgws-plugin.php:1831 includes/class-mgws-plugin.php:1838 includes/class-mgws-plugin.php:1847 includes/class-mgws-plugin.php:2027
+msgid "Invalid security token"
+msgstr ""
+
+#: assets/admin-masterdata.js:518 includes/class-mgws-plugin.php:1632 includes/class-mgws-plugin.php:1748 includes/class-mgws-plugin.php:1975 includes/mgws-db.php:63
+msgid "Invalid site"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1051
+msgid "Invalid variation"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1941 includes/class-mgws-plugin.php:2053 includes/mgws-db.php:382
+msgid "Invalid warehouse"
+msgstr ""
+
+#: assets/admin-masterdata.js:525
+msgid "It will be created inside the selected site."
+msgstr ""
+
+#: assets/admin-masterdata.js:268 assets/admin-masterdata.js:274
+msgid "Link"
+msgstr ""
+
+#: assets/admin-masterdata.js:754
+msgid "Linked"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:486
+msgid "Load availability"
+msgstr ""
+
+#: assets/admin-masterdata.js:445 assets/admin-order.js:180
+msgid "Loading..."
+msgstr ""
+
+#: assets/admin-order.js:34
+msgid "Location"
+msgstr ""
+
+#: includes/mgws-db.php:2428 includes/mgws-db.php:2782 includes/mgws-db.php:3016
+msgid "Location is not linked to this warehouse. Link the shelves in WooCommerce → Warehouse."
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1901
+msgid "Location not found in the site structure"
+msgstr ""
+
+#: assets/admin-masterdata.js:244
+msgid "Locations linked to the warehouse"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:145
+msgid "MG Warehouse Stock needs WooCommerce to be installed and active. Warehouse levels, purchase orders and the point of sale stay unavailable until it is."
+msgstr ""
+
+#: includes/class-mgws-plugin.php:601
+msgid "Manage sites, warehouses and locations"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:220
+msgid "Manage the location tree: Site → Warehouse → Room → Rack → Shelf."
+msgstr ""
+
+#: includes/mgws-db.php:93
+msgid "Missing context"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1527 includes/class-mgws-plugin.php:1622 includes/class-mgws-plugin.php:1740 includes/class-mgws-plugin.php:1884 includes/class-mgws-plugin.php:1920 includes/mgws-db.php:443
+msgid "Missing data"
+msgstr ""
+
+#: includes/mgws-db.php:405
+msgid "Missing rack"
+msgstr ""
+
+#: includes/mgws-db.php:389
+msgid "Missing room"
+msgstr ""
+
+#: includes/mgws-db.php:420
+msgid "Missing shelf"
+msgstr ""
+
+#: includes/mgws-db.php:70
+msgid "Missing value"
+msgstr ""
+
+#: assets/admin-order.js:87 assets/admin-order.js:98
+msgid "Missing:"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:637
+msgid "Name"
+msgstr ""
+
+#: assets/admin-product.js:696
+msgid "New"
+msgstr ""
+
+#: assets/admin-masterdata.js:571
+msgid "New rack"
+msgstr ""
+
+#: assets/admin-masterdata.js:569
+msgid "New room"
+msgstr ""
+
+#: assets/admin-masterdata.js:572
+msgid "New shelf"
+msgstr ""
+
+#: assets/admin-masterdata.js:492
+msgid "New site"
+msgstr ""
+
+#: assets/admin-masterdata.js:522
+msgid "New warehouse"
+msgstr ""
+
+#: assets/admin-order.js:14
+msgid "No availability found (qty >= 1)."
+msgstr ""
+
+#: assets/admin-masterdata.js:251
+msgid "No link set: in this state the warehouse still sees every location of the site. To restrict it, link at least one room, rack or shelf."
+msgstr ""
+
+#: includes/mgws-db.php:2310
+msgid "No location"
+msgstr ""
+
+#: assets/admin-masterdata.js:290
+msgid "No location linked."
+msgstr ""
+
+#: assets/admin-masterdata.js:387 assets/admin-masterdata.js:392
+msgid "No location saved."
+msgstr ""
+
+#: assets/admin-masterdata.js:311
+msgid "No rack linked."
+msgstr ""
+
+#: assets/admin-masterdata.js:413
+msgid "No rack."
+msgstr ""
+
+#: assets/admin-masterdata.js:335
+msgid "No shelf linked."
+msgstr ""
+
+#: assets/admin-masterdata.js:432
+msgid "No shelf."
+msgstr ""
+
+#: assets/admin-masterdata.js:348
+msgid "No site or warehouse configured."
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1299
+msgid "Not enough stock for every order line"
+msgstr ""
+
+#: includes/class-mgws-rest-api.php:3555
+msgid "Not enough stock in the source warehouse"
+msgstr ""
+
+#: includes/mgws-db.php:2829
+msgid "Not enough stock, or no such stock level"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1888
+msgid "Only shelf links are allowed here"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1360
+msgid "Order accepted"
+msgstr ""
+
+#: includes/class-mgws-rest-api.php:4417
+msgid "Order accepted (API)."
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1350
+msgid "Order accepted."
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1224
+msgid "Order already accepted"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:484
+msgid "Order already accepted."
+msgstr ""
+
+#: includes/class-mgws-plugin.php:536
+msgid "Order: Site → Warehouse → Room → Rack → Shelf. To add or remove locations, go to WooCommerce → Warehouse."
+msgstr ""
+
+#: assets/admin-order.js:34
+msgid "Pick"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:446
+msgid "Picking / Acceptance"
+msgstr ""
+
+#: assets/admin-order.js:34
+msgid "Priority"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:654
+msgid "Product"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1400
+msgid "Product #"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1009
+msgid "Product not found"
+msgstr ""
+
+#: assets/admin-order.js:219
+msgid "Product not fully available. Do you want to continue?"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:607 includes/class-mgws-plugin.php:639
+msgid "Purchase cost"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2063
+msgid "Quantity must be 0 or more"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2079 includes/class-mgws-plugin.php:2092 includes/class-mgws-plugin.php:2105
+msgid "Quantity must be greater than 0"
+msgstr ""
+
+#: assets/admin-masterdata.js:260 assets/admin-masterdata.js:551 assets/admin-product.js:672 assets/admin-product.js:692 includes/class-mgws-plugin.php:589 includes/class-mgws-plugin.php:644
+msgid "Rack"
+msgstr ""
+
+#: includes/mgws-db.php:88
+msgid "Rack not found"
+msgstr ""
+
+#: assets/admin-masterdata.js:320 assets/admin-masterdata.js:420
+#, php-format
+msgid "Rack: %s"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:224
+msgid "Reload"
+msgstr ""
+
+#: assets/admin-masterdata.js:771
+msgid "Remove the link?"
+msgstr ""
+
+#: assets/admin-masterdata.js:786
+msgid "Removed"
+msgstr ""
+
+#: assets/admin-masterdata.js:772
+msgid "Removing..."
+msgstr ""
+
+#: assets/admin-masterdata.js:466 assets/admin-masterdata.js:508 assets/admin-masterdata.js:538 assets/admin-masterdata.js:599 assets/admin-masterdata.js:645 assets/admin-masterdata.js:757 assets/admin-masterdata.js:789 assets/admin-masterdata.js:815 assets/admin-masterdata.js:841 assets/admin-order.js:193 assets/admin-order.js:237
+msgid "Request failed"
+msgstr ""
+
+#: assets/admin-order.js:27
+msgid "Required:"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:625
+msgid "Reset columns"
+msgstr ""
+
+#: assets/admin-masterdata.js:256 assets/admin-masterdata.js:549 assets/admin-product.js:670 assets/admin-product.js:683 assets/admin-product.js:690 includes/class-mgws-plugin.php:585 includes/class-mgws-plugin.php:643
+msgid "Room"
+msgstr ""
+
+#: includes/mgws-db.php:80
+msgid "Room not found"
+msgstr ""
+
+#: assets/admin-masterdata.js:300 assets/admin-masterdata.js:406 assets/admin-masterdata.js:555
+#, php-format
+msgid "Room: %s"
+msgstr ""
+
+#: assets/admin-masterdata.js:559
+#, php-format
+msgid "Room: %s / Rack: %s"
+msgstr ""
+
+#: assets/admin-masterdata.js:37 assets/admin-product.js:87
+msgid "Save"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:626
+msgid "Save the product to confirm."
+msgstr ""
+
+#: assets/admin-masterdata.js:595
+msgid "Saved"
+msgstr ""
+
+#: assets/admin-masterdata.js:740
+msgid "Saving the link..."
+msgstr ""
+
+#: assets/admin-order.js:224
+msgid "Saving..."
+msgstr ""
+
+#: includes/class-mgws-plugin.php:228
+msgid "Search (site, warehouse, room...)"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2108
+msgid "Select a destination warehouse"
+msgstr ""
+
+#: assets/admin-masterdata.js:736 includes/class-mgws-plugin.php:1891
+msgid "Select a rack and a shelf"
+msgstr ""
+
+#: assets/admin-product.js:664 includes/class-mgws-plugin.php:1658 includes/class-mgws-plugin.php:1763
+msgid "Select a room and a rack first"
+msgstr ""
+
+#: assets/admin-product.js:656 includes/class-mgws-plugin.php:1655 includes/class-mgws-plugin.php:1760
+msgid "Select a room first"
+msgstr ""
+
+#: assets/admin-product.js:614
+msgid "Select a site first"
+msgstr ""
+
+#: assets/admin-product.js:649
+msgid "Select a warehouse first"
+msgstr ""
+
+#: assets/admin-masterdata.js:732
+msgid "Select at least one room"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:619
+msgid "Set Site / Warehouse / Room / Rack / Shelf for each variation. All fields are optional."
+msgstr ""
+
+#: assets/admin-masterdata.js:264 assets/admin-masterdata.js:552 assets/admin-product.js:673 includes/class-mgws-plugin.php:593 includes/class-mgws-plugin.php:645
+msgid "Shelf"
+msgstr ""
+
+#: assets/admin-masterdata.js:272
+msgid "Single shelf"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2145 includes/class-mgws-plugin.php:569 includes/class-mgws-plugin.php:641 includes/class-mgws-rest-api.php:561
+msgid "Site"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1132 includes/class-mgws-plugin.php:571 includes/class-mgws-plugin.php:711
+msgid "Site #"
+msgstr ""
+
+#: assets/admin-masterdata.js:503
+msgid "Site created"
+msgstr ""
+
+#: assets/admin-masterdata.js:837
+msgid "Site deleted"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1635 includes/class-mgws-plugin.php:1751 includes/class-mgws-plugin.php:1980
+msgid "Site is outside your assigned site"
+msgstr ""
+
+#: assets/admin-masterdata.js:493 assets/admin-product.js:569
+msgid "Site name"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1502
+msgid "Site name is missing"
+msgstr ""
+
+#: assets/admin-masterdata.js:360 assets/admin-masterdata.js:373
+#, php-format
+msgid "Site: %s"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2111
+msgid "Source and destination warehouse must be different"
+msgstr ""
+
+#: includes/mgws-db.php:3039
+msgid "Stock changed or is no longer sufficient, reload and try again"
+msgstr ""
+
+#: includes/class-mgws-rest-api.php:4650
+msgid "Stock ran out or changed during checkout"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2087
+msgid "Stock-in recorded"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2100
+msgid "Stock-out recorded"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:469
+msgid "The order could not be loaded."
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1497
+msgid "This user is limited to one site and cannot create new ones"
+msgstr ""
+
+#: assets/admin-masterdata.js:488
+msgid "This user is restricted to one site and cannot create new ones"
+msgstr ""
+
+#: assets/admin-order.js:27
+msgid "Total available:"
+msgstr ""
+
+#: assets/admin-order.js:98
+msgid "Total picked:"
+msgstr ""
+
+#: assets/admin-order.js:98
+msgid "Total required:"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2138
+msgid "Transfer recorded"
+msgstr ""
+
+#: assets/admin-masterdata.js:303 assets/admin-masterdata.js:323
+msgid "Unlink"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2074
+msgid "Updated"
+msgstr ""
+
+#: assets/admin-product.js:798
+msgid "Values were copied to the interface only. Save the product to confirm."
+msgstr ""
+
+#: includes/class-mgws-plugin.php:640
+msgid "Variation"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1054
+msgid "Variation does not belong to this product"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:205 includes/class-mgws-plugin.php:206 includes/class-mgws-plugin.php:2184 includes/class-mgws-plugin.php:219 includes/class-mgws-plugin.php:258 includes/class-mgws-plugin.php:581 includes/class-mgws-plugin.php:642 includes/class-mgws-rest-api.php:586
+msgid "Warehouse"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1139
+msgid "Warehouse #"
+msgstr ""
+
+#: assets/admin-masterdata.js:533
+msgid "Warehouse created"
+msgstr ""
+
+#: assets/admin-masterdata.js:811
+msgid "Warehouse deleted"
+msgstr ""
+
+#: includes/mgws-db.php:2424 includes/mgws-db.php:2778
+msgid "Warehouse has no site"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1482 includes/class-mgws-plugin.php:1897 includes/class-mgws-plugin.php:1926 includes/class-mgws-plugin.php:1947 includes/class-mgws-plugin.php:2056
+msgid "Warehouse is outside your assigned site"
+msgstr ""
+
+#: assets/admin-masterdata.js:523 assets/admin-product.js:617
+msgid "Warehouse name"
+msgstr ""
+
+#: assets/admin-masterdata.js:372
+#, php-format
+msgid "Warehouse: %s"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1353 includes/class-mgws-rest-api.php:4420
+#, php-format
+msgid "Warning: not enough stock for %d units."
+msgstr ""
+
+#: includes/class-mgws-plugin.php:2194
+msgid "When set, limits the user to a single site."
+msgstr ""
+
+#: assets/admin-masterdata.js:271
+msgid "Whole rack"
+msgstr ""
+
+#: assets/admin-masterdata.js:270
+msgid "Whole room"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:607
+msgid "WooCommerce `_purchase_cost` meta, also updated by supplier receipts."
+msgstr ""
+
+#: includes/class-mgws-plugin.php:1069 includes/class-mgws-plugin.php:1210 includes/class-mgws-plugin.php:1405 includes/class-mgws-plugin.php:1448 includes/class-mgws-plugin.php:1471 includes/class-mgws-plugin.php:1491 includes/class-mgws-plugin.php:1520 includes/class-mgws-plugin.php:1551 includes/class-mgws-plugin.php:1609 includes/class-mgws-plugin.php:1728 includes/class-mgws-plugin.php:1820 includes/class-mgws-plugin.php:1844 includes/class-mgws-plugin.php:2024 includes/class-mgws-plugin.php:215
+msgid "You do not have permission to do that"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:456
+msgid "You do not have permission to do that."
+msgstr ""
+
+#: assets/admin-masterdata.js:302 assets/admin-masterdata.js:322
+msgid "all"
+msgstr ""
+
+#: assets/admin-masterdata.js:524
+msgid "e.g. Central Warehouse"
+msgstr ""
+
+#: assets/admin-masterdata.js:494
+msgid "e.g. Milan"
+msgstr ""
+
+#: assets/admin-masterdata.js:246 assets/admin-masterdata.js:407
+msgid "rack"
+msgid_plural "racks"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/admin-masterdata.js:245
+msgid "room"
+msgid_plural "rooms"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/admin-masterdata.js:247 assets/admin-masterdata.js:421
+msgid "shelf"
+msgid_plural "shelves"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/admin-masterdata.js:361
+msgid "warehouse"
+msgid_plural "warehouses"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-mgws-plugin.php:401 includes/class-mgws-plugin.php:415 includes/class-mgws-plugin.php:419
+msgctxt "order status"
+msgid "Accepted"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:287
+msgctxt "post type plural name"
+msgid "Sites"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:300
+msgctxt "post type plural name"
+msgid "Warehouses"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:288
+msgctxt "post type singular name"
+msgid "Site"
+msgstr ""
+
+#: includes/class-mgws-plugin.php:301
+msgctxt "post type singular name"
+msgid "Warehouse"
+msgstr ""
+

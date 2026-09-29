@@ -25,7 +25,7 @@
     html += '  <div class="mgws-modal-dialog" role="dialog" aria-modal="true">';
     html += '    <div class="mgws-modal-header">';
     html += '      <h2 id="mgws-modal-title" style="margin:0;"></h2>';
-    html += '      <button type="button" class="button-link" id="mgws-modal-close">Chiudi</button>';
+    html += '      <button type="button" class="button-link" id="mgws-modal-close">' + wp.i18n.__('Close', 'mg-warehouse-stock') + '</button>';
     html += '    </div>';
     html += '    <div class="mgws-modal-body">';
     html += '      <label id="mgws-modal-label" for="mgws-modal-input" style="display:block; margin-bottom:6px;"></label>';
@@ -34,8 +34,8 @@
     html += '      <div id="mgws-modal-err" class="mgws-err" style="margin-top:6px;"></div>';
     html += '    </div>';
     html += '    <div class="mgws-modal-footer">';
-    html += '      <button type="button" class="button button-primary" id="mgws-modal-ok">Salva</button>';
-    html += '      <button type="button" class="button" id="mgws-modal-cancel">Annulla</button>';
+    html += '      <button type="button" class="button button-primary" id="mgws-modal-ok">' + wp.i18n.__('Save', 'mg-warehouse-stock') + '</button>';
+    html += '      <button type="button" class="button" id="mgws-modal-cancel">' + wp.i18n.__('Cancel', 'mg-warehouse-stock') + '</button>';
     html += '    </div>';
     html += '  </div>';
     html += '</div>';
@@ -72,7 +72,7 @@
     currentSubmit = function () {
       var v = String($('#mgws-modal-input').val() || '').trim();
       if (!v) {
-        $('#mgws-modal-err').text('Inserisci un valore');
+        $('#mgws-modal-err').text(wp.i18n.__('Enter a value', 'mg-warehouse-stock'));
         return;
       }
       $('#mgws-modal-input').prop('disabled', true);
@@ -241,37 +241,37 @@
 
     var html = '';
     html += '<details class="mgws-wh-links" data-warehouse-id="' + esc(wh.id) + '" style="margin-top:10px;">';
-    html += '<summary><span class="mgws-summary-title">Ubicazioni collegate al magazzino</span>';
-    html += '<span class="mgws-chip">' + esc(roomsCount) + ' stanze</span>';
-    html += '<span class="mgws-chip">' + esc(racksCount) + ' scaffali</span>';
-    html += '<span class="mgws-chip">' + esc(shelvesCount) + ' mensole</span>';
+    html += '<summary><span class="mgws-summary-title">' + wp.i18n.__('Locations linked to the warehouse', 'mg-warehouse-stock') + '</span>';
+    html += '<span class="mgws-chip">' + esc(roomsCount) + ' ' + wp.i18n._n('room', 'rooms', roomsCount, 'mg-warehouse-stock') + '</span>';
+    html += '<span class="mgws-chip">' + esc(racksCount) + ' ' + wp.i18n._n('rack', 'racks', racksCount, 'mg-warehouse-stock') + '</span>';
+    html += '<span class="mgws-chip">' + esc(shelvesCount) + ' ' + wp.i18n._n('shelf', 'shelves', shelvesCount, 'mg-warehouse-stock') + '</span>';
     html += '</summary>';
 
     if (roomsCount === 0) {
-      html += '<p><small>Nessun collegamento impostato: in questo stato il magazzino vede comunque tutte le ubicazioni della sede. Se vuoi limitarlo, collega almeno una stanza/scaffale/mensola.</small></p>';
+      html += '<p><small>' + wp.i18n.__('No link set: in this state the warehouse still sees every location of the site. To restrict it, link at least one room, rack or shelf.', 'mg-warehouse-stock') + '</small></p>';
     }
 
     html += '<div class="mgws-row" style="margin-top:8px;">';
     html += '<span class="mgws-inline">'
-      + '<label>Stanza</label>'
+      + '<label>' + wp.i18n.__('Room', 'mg-warehouse-stock') + '</label>'
       + '<select class="wc-enhanced-select" data-role="wh-link-room" data-site-id="' + esc(siteId) + '" data-warehouse-id="' + esc(wh.id) + '" style="min-width:220px;"></select>'
       + '</span>';
     html += '<span class="mgws-inline">'
-      + '<label>Scaffale</label>'
+      + '<label>' + wp.i18n.__('Rack', 'mg-warehouse-stock') + '</label>'
       + '<select class="wc-enhanced-select" data-role="wh-link-rack" data-site-id="' + esc(siteId) + '" data-warehouse-id="' + esc(wh.id) + '" style="min-width:220px;" disabled></select>'
       + '</span>';
     html += '<span class="mgws-inline">'
-      + '<label>Mensola</label>'
+      + '<label>' + wp.i18n.__('Shelf', 'mg-warehouse-stock') + '</label>'
       + '<select class="wc-enhanced-select" data-role="wh-link-shelf" data-site-id="' + esc(siteId) + '" data-warehouse-id="' + esc(wh.id) + '" style="min-width:220px;" disabled></select>'
       + '</span>';
     html += '<span class="mgws-inline">'
-      + '<label>Collega</label>'
+      + '<label>' + wp.i18n.__('Link', 'mg-warehouse-stock') + '</label>'
       + '<select class="wc-enhanced-select" data-role="wh-link-scope" data-warehouse-id="' + esc(wh.id) + '" style="min-width:220px;">'
-      + '<option value="room_all">Stanza intera</option>'
-      + '<option value="rack_all">Scaffale intero</option>'
-      + '<option value="shelf_one">Solo mensola</option>'
+      + '<option value="room_all">' + wp.i18n.__('Whole room', 'mg-warehouse-stock') + '</option>'
+      + '<option value="rack_all">' + wp.i18n.__('Whole rack', 'mg-warehouse-stock') + '</option>'
+      + '<option value="shelf_one">' + wp.i18n.__('Single shelf', 'mg-warehouse-stock') + '</option>'
       + '</select>'
-      + '<button type="button" class="button button-primary" data-action="wh-link" data-site-id="' + esc(siteId) + '" data-warehouse-id="' + esc(wh.id) + '">Collega</button>'
+      + '<button type="button" class="button button-primary" data-action="wh-link" data-site-id="' + esc(siteId) + '" data-warehouse-id="' + esc(wh.id) + '">' + wp.i18n.__('Link', 'mg-warehouse-stock') + '</button>'
       + '</span>';
     html += '</div>';
 
@@ -287,7 +287,7 @@
       return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
     });
     if (roomNames.length === 0) {
-      return '<p><small>Nessuna ubicazione collegata.</small></p>';
+      return '<p><small>' + wp.i18n.__('No location linked.', 'mg-warehouse-stock') + '</small></p>';
     }
 
     var html = '';
@@ -296,8 +296,11 @@
       var roomAll = false;
       html += '<details class="mgws-room" data-room="' + esc(room) + '">';
       html += '<summary>';
-      html += '<span class="mgws-summary-title">Stanza: ' + esc(room) + (roomAll ? ' (tutto)' : '') + '</span>';
-      html += '<button type="button" class="button button-link-delete" data-action="wh-unlink" data-scope="room_all" data-warehouse-id="' + esc(warehouseId) + '" data-site-id="' + esc(siteId) + '" data-room="' + esc(room) + '">Rimuovi</button>';
+      html += '<span class="mgws-summary-title">' + wp.i18n.sprintf(
+        wp.i18n.__('Room: %s', 'mg-warehouse-stock'),
+        esc(room)
+      ) + (roomAll ? ' (' + wp.i18n.__('all', 'mg-warehouse-stock') + ')' : '') + '</span>';
+      html += '<button type="button" class="button button-link-delete" data-action="wh-unlink" data-scope="room_all" data-warehouse-id="' + esc(warehouseId) + '" data-site-id="' + esc(siteId) + '" data-room="' + esc(room) + '"' + wp.i18n.__('Unlink', 'mg-warehouse-stock') + '</button>';
       html += '</summary>';
       if (!roomAll) {
         var racks = (rd.racks || {});
@@ -305,7 +308,7 @@
           return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
         });
         if (rackNames.length === 0) {
-          html += '<p><small>Nessuno scaffale collegato.</small></p>';
+          html += '<p><small>' + wp.i18n.__('No rack linked.', 'mg-warehouse-stock') + '</small></p>';
         }
         rackNames.forEach(function (rack) {
           var rk = racks[rack] || {};
@@ -313,8 +316,11 @@
           var shelves = rk.shelves || [];
           html += '<details class="mgws-rack" data-rack="' + esc(rack) + '">';
           html += '<summary>';
-          html += '<span class="mgws-summary-title">Scaffale: ' + esc(rack) + (rackAll ? ' (tutto)' : '') + '</span>';
-          html += '<button type="button" class="button button-link-delete" data-action="wh-unlink" data-scope="rack_all" data-warehouse-id="' + esc(warehouseId) + '" data-site-id="' + esc(siteId) + '" data-room="' + esc(room) + '" data-rack="' + esc(rack) + '">Rimuovi</button>';
+          html += '<span class="mgws-summary-title">' + wp.i18n.sprintf(
+            wp.i18n.__('Rack: %s', 'mg-warehouse-stock'),
+            esc(rack)
+          ) + (rackAll ? ' (' + wp.i18n.__('all', 'mg-warehouse-stock') + ')' : '') + '</span>';
+          html += '<button type="button" class="button button-link-delete" data-action="wh-unlink" data-scope="rack_all" data-warehouse-id="' + esc(warehouseId) + '" data-site-id="' + esc(siteId) + '" data-room="' + esc(room) + '" data-rack="' + esc(rack) + '"' + wp.i18n.__('Unlink', 'mg-warehouse-stock') + '</button>';
           html += '</summary>';
           if (!rackAll) {
             if (shelves && shelves.length) {
@@ -326,7 +332,7 @@
               });
               html += '</div>';
             } else {
-              html += '<p><small>Nessuna mensola collegata.</small></p>';
+              html += '<p><small>' + wp.i18n.__('No shelf linked.', 'mg-warehouse-stock') + '</small></p>';
             }
           }
           html += '</details>';
@@ -339,7 +345,7 @@
 
   function renderTree(tree) {
     if (!tree || !tree.sites || tree.sites.length === 0) {
-      return '<p>Nessuna sede/magazzino configurato.</p>';
+      return '<p>' + wp.i18n.__('No site or warehouse configured.', 'mg-warehouse-stock') + '</p>';
     }
 
     var html = '';
@@ -351,11 +357,11 @@
 
       html += '<div class="mgws-node" data-site-id="' + esc(s.id) + '">';
       html += '<div class="mgws-node-header">';
-      html += '<h2 class="mgws-title">Sede: ' + esc(s.name) + '</h2>';
-      html += '<span class="mgws-chip">' + esc((s.warehouses || []).length) + ' magazzini</span>';
-      html += '<button type="button" class="button" data-action="add-warehouse" data-site-id="' + esc(s.id) + '">+ Magazzino</button>';
-      html += '<button type="button" class="button" data-action="add-room" data-site-id="' + esc(s.id) + '">+ Stanza</button>';
-      html += '<button type="button" class="button button-link-delete" data-action="del-site" data-site-id="' + esc(s.id) + '">Elimina sede</button>';
+      html += '<h2 class="mgws-title">' + wp.i18n.sprintf(wp.i18n.__('Site: %s', 'mg-warehouse-stock'), esc(s.name)) + '</h2>';
+      html += '<span class="mgws-chip">' + esc((s.warehouses || []).length) + ' ' + wp.i18n._n('warehouse', 'warehouses', (s.warehouses || []).length, 'mg-warehouse-stock') + '</span>';
+      html += '<button type="button" class="button" data-action="add-warehouse" data-site-id="' + esc(s.id) + '"' + wp.i18n.__('+ Warehouse', 'mg-warehouse-stock') + '</button>';
+      html += '<button type="button" class="button" data-action="add-room" data-site-id="' + esc(s.id) + '"' + wp.i18n.__('+ Room', 'mg-warehouse-stock') + '</button>';
+      html += '<button type="button" class="button button-link-delete" data-action="del-site" data-site-id="' + esc(s.id) + '"' + wp.i18n.__('Delete site', 'mg-warehouse-stock') + '</button>';
       html += '</div>';
 
       html += '<div class="mgws-tree">' + renderWarehouseTree(s.tree, s.id) + '</div>';
@@ -363,9 +369,9 @@
       (s.warehouses || []).forEach(function (w) {
         html += '<div class="mgws-node" style="margin-top:10px;" data-warehouse-id="' + esc(w.id) + '">';
         html += '<div class="mgws-node-header">';
-        html += '<h3 class="mgws-title">Magazzino: ' + esc(w.name) + '</h3>';
-        html += '<span class="mgws-chip">Sede: ' + esc(s.name) + '</span>';
-        html += '<button type="button" class="button button-link-delete" data-action="del-warehouse" data-warehouse-id="' + esc(w.id) + '">Elimina magazzino</button>';
+        html += '<h3 class="mgws-title">' + wp.i18n.sprintf(wp.i18n.__('Warehouse: %s', 'mg-warehouse-stock'), esc(w.name)) + '</h3>';
+        html += '<span class="mgws-chip">' + wp.i18n.sprintf(wp.i18n.__('Site: %s', 'mg-warehouse-stock'), esc(s.name)) + '</span>';
+        html += '<button type="button" class="button button-link-delete" data-action="del-warehouse" data-warehouse-id="' + esc(w.id) + '"' + wp.i18n.__('Delete warehouse', 'mg-warehouse-stock') + '</button>';
         html += '</div>';
         html += renderWarehouseLinksEditor(s.id, w);
         html += '</div>';
@@ -378,12 +384,12 @@
 
   function renderWarehouseTree(tree, siteId) {
     if (!tree || !tree.rooms) {
-      return '<p><small>Nessuna ubicazione salvata.</small></p>';
+      return '<p><small>' + wp.i18n.__('No location saved.', 'mg-warehouse-stock') + '</small></p>';
     }
     var rooms = tree.rooms;
     var roomNames = Object.keys(rooms || {});
     if (roomNames.length === 0) {
-      return '<p><small>Nessuna ubicazione salvata.</small></p>';
+      return '<p><small>' + wp.i18n.__('No location saved.', 'mg-warehouse-stock') + '</small></p>';
     }
     roomNames.sort(function (a, b) {
       return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
@@ -397,24 +403,24 @@
       });
       html += '<details class="mgws-room" data-room="' + esc(room) + '">';
       html += '<summary>';
-      html += '<span class="mgws-summary-title">Stanza: ' + esc(room) + '</span>';
-      html += '<span class="mgws-chip">' + esc(rackNames.length) + ' scaffali</span>';
-      html += '<button type="button" class="button" data-action="add-rack" data-site-id="' + esc(siteId) + '" data-room="' + esc(room) + '">+ Scaffale</button>';
-      html += '<button type="button" class="button button-link-delete" data-action="del-room" data-site-id="' + esc(siteId) + '" data-room="' + esc(room) + '">Elimina</button>';
+      html += '<span class="mgws-summary-title">' + wp.i18n.sprintf(wp.i18n.__('Room: %s', 'mg-warehouse-stock'), esc(room)) + '</span>';
+      html += '<span class="mgws-chip">' + esc(rackNames.length) + ' ' + wp.i18n._n('rack', 'racks', rackNames.length, 'mg-warehouse-stock') + '</span>';
+      html += '<button type="button" class="button" data-action="add-rack" data-site-id="' + esc(siteId) + '" data-room="' + esc(room) + '"' + wp.i18n.__('+ Rack', 'mg-warehouse-stock') + '</button>';
+      html += '<button type="button" class="button button-link-delete" data-action="del-room" data-site-id="' + esc(siteId) + '" data-room="' + esc(room) + '"' + wp.i18n.__('Delete', 'mg-warehouse-stock') + '</button>';
       html += '</summary>';
 
       if (rackNames.length === 0) {
-        html += '<p><small>Nessuno scaffale.</small></p>';
+        html += '<p><small>' + wp.i18n.__('No rack.', 'mg-warehouse-stock') + '</small></p>';
       }
 
       rackNames.forEach(function (rack) {
         var shelves = (racks[rack] && racks[rack].shelves) ? racks[rack].shelves : [];
         html += '<details class="mgws-rack" data-rack="' + esc(rack) + '">';
         html += '<summary>';
-        html += '<span class="mgws-summary-title">Scaffale: ' + esc(rack) + '</span>';
-        html += '<span class="mgws-chip">' + esc((shelves || []).length) + ' mensole</span>';
-        html += '<button type="button" class="button" data-action="add-shelf" data-site-id="' + esc(siteId) + '" data-room="' + esc(room) + '" data-rack="' + esc(rack) + '">+ Mensola</button>';
-        html += '<button type="button" class="button button-link-delete" data-action="del-rack" data-site-id="' + esc(siteId) + '" data-room="' + esc(room) + '" data-rack="' + esc(rack) + '">Elimina</button>';
+        html += '<span class="mgws-summary-title">' + wp.i18n.sprintf(wp.i18n.__('Rack: %s', 'mg-warehouse-stock'), esc(rack)) + '</span>';
+        html += '<span class="mgws-chip">' + esc((shelves || []).length) + ' ' + wp.i18n._n('shelf', 'shelves', (shelves || []).length, 'mg-warehouse-stock') + '</span>';
+        html += '<button type="button" class="button" data-action="add-shelf" data-site-id="' + esc(siteId) + '" data-room="' + esc(room) + '" data-rack="' + esc(rack) + '"' + wp.i18n.__('+ Shelf', 'mg-warehouse-stock') + '</button>';
+        html += '<button type="button" class="button button-link-delete" data-action="del-rack" data-site-id="' + esc(siteId) + '" data-room="' + esc(room) + '" data-rack="' + esc(rack) + '"' + wp.i18n.__('Delete', 'mg-warehouse-stock') + '</button>';
         html += '</summary>';
         if (shelves && shelves.length) {
           html += '<div class="mgws-shelves">';
@@ -423,7 +429,7 @@
           });
           html += '</div>';
         } else {
-          html += '<p><small>Nessuna mensola.</small></p>';
+          html += '<p><small>' + wp.i18n.__('No shelf.', 'mg-warehouse-stock') + '</small></p>';
         }
         html += '</details>';
       });
@@ -436,12 +442,12 @@
   function load() {
     var c = ctx();
     var prevOpen = captureOpenState();
-    $('#mgws-master-tree').html('<p>Caricamento...</p>');
+    $('#mgws-master-tree').html('<p>' + wp.i18n.__('Loading...', 'mg-warehouse-stock') + '</p>');
     setMsg('', true);
     $.post(MGWS_MASTER.ajaxUrl, { action: 'mgws_admin_get_tree', nonce: c.nonce })
       .done(function (resp) {
         if (!resp || !resp.success) {
-          setMsg((resp && resp.data && resp.data.message) ? resp.data.message : 'Errore', false);
+          setMsg((resp && resp.data && resp.data.message) ? resp.data.message : wp.i18n.__('Error', 'mg-warehouse-stock'), false);
           $('#mgws-master-tree').html('');
           return;
         }
@@ -457,7 +463,7 @@
         restoreOpenState(prevOpen);
       })
       .fail(function () {
-        setMsg('Errore richiesta', false);
+        setMsg(wp.i18n.__('Request failed', 'mg-warehouse-stock'), false);
         $('#mgws-master-tree').html('');
       });
   }
@@ -479,27 +485,27 @@
   function createSite() {
     var c = ctx();
     if (c.siteLimit > 0) {
-      setMsg('Utente limitato a una sede: non puo creare nuove sedi', false);
+      setMsg(wp.i18n.__('This user is restricted to one site and cannot create new ones', 'mg-warehouse-stock'), false);
       return;
     }
     openModal({
-      title: 'Nuova sede',
-      label: 'Nome sede',
-      placeholder: 'Es. Milano',
-      hint: 'Crea una nuova sede.',
+      title: wp.i18n.__('New site', 'mg-warehouse-stock'),
+      label: wp.i18n.__('Site name', 'mg-warehouse-stock'),
+      placeholder: wp.i18n.__('e.g. Milan', 'mg-warehouse-stock'),
+      hint: wp.i18n.__('Create a new site.', 'mg-warehouse-stock'),
       onSubmit: function (name, done) {
         $.post(MGWS_MASTER.ajaxUrl, { action: 'mgws_create_site', nonce: c.nonce, name: name })
           .done(function (resp) {
             if (!resp || !resp.success) {
-              done((resp && resp.data && resp.data.message) ? resp.data.message : 'Errore');
+              done((resp && resp.data && resp.data.message) ? resp.data.message : wp.i18n.__('Error', 'mg-warehouse-stock'));
               return;
             }
-            setMsg('Sede creata', true);
+            setMsg(wp.i18n.__('Site created', 'mg-warehouse-stock'), true);
             load();
             done('');
           })
           .fail(function () {
-            done('Errore richiesta');
+            done(wp.i18n.__('Request failed', 'mg-warehouse-stock'));
           });
       }
     });
@@ -509,27 +515,27 @@
     var c = ctx();
     var sid = parseInt(siteId, 10) || 0;
     if (!sid) {
-      setMsg('Sede non valida', false);
+      setMsg(wp.i18n.__('Invalid site', 'mg-warehouse-stock'), false);
       return;
     }
     openModal({
-      title: 'Nuovo magazzino',
-      label: 'Nome magazzino',
-      placeholder: 'Es. Magazzino Centrale',
-      hint: 'Verrà creato dentro la sede selezionata.',
+      title: wp.i18n.__('New warehouse', 'mg-warehouse-stock'),
+      label: wp.i18n.__('Warehouse name', 'mg-warehouse-stock'),
+      placeholder: wp.i18n.__('e.g. Central Warehouse', 'mg-warehouse-stock'),
+      hint: wp.i18n.__('It will be created inside the selected site.', 'mg-warehouse-stock'),
       onSubmit: function (name, done) {
         $.post(MGWS_MASTER.ajaxUrl, { action: 'mgws_create_warehouse', nonce: c.nonce, site_id: sid, name: name })
           .done(function (resp) {
             if (!resp || !resp.success) {
-              done((resp && resp.data && resp.data.message) ? resp.data.message : 'Errore');
+              done((resp && resp.data && resp.data.message) ? resp.data.message : wp.i18n.__('Error', 'mg-warehouse-stock'));
               return;
             }
-            setMsg('Magazzino creato', true);
+            setMsg(wp.i18n.__('Warehouse created', 'mg-warehouse-stock'), true);
             load();
             done('');
           })
           .fail(function () {
-            done('Errore richiesta');
+            done(wp.i18n.__('Request failed', 'mg-warehouse-stock'));
           });
       }
     });
@@ -539,14 +545,37 @@
     var c = ctx();
     var targetId = parseInt(id, 10) || 0;
     if (!targetId) return;
-    var label = (field === 'room') ? 'Stanza' : (field === 'rack') ? 'Scaffale' : 'Mensola';
+    var label = (field === 'room')
+      ? wp.i18n.__('Room', 'mg-warehouse-stock')
+      : (field === 'rack')
+        ? wp.i18n.__('Rack', 'mg-warehouse-stock')
+        : wp.i18n.__('Shelf', 'mg-warehouse-stock');
     var hint = '';
-    if (field === 'rack' && parentRoom) hint = 'Stanza: ' + parentRoom;
-    if (field === 'shelf' && parentRoom && parentRack) hint = 'Stanza: ' + parentRoom + ' / Scaffale: ' + parentRack;
+    if (field === 'rack' && parentRoom) {
+      hint = wp.i18n.sprintf(wp.i18n.__('Room: %s', 'mg-warehouse-stock'), parentRoom);
+    }
+    if (field === 'shelf' && parentRoom && parentRack) {
+      hint = wp.i18n.sprintf(
+        wp.i18n.__('Room: %s / Rack: %s', 'mg-warehouse-stock'),
+        parentRoom,
+        parentRack
+      );
+    }
     openModal({
-      title: 'Nuovo ' + label,
+      // Three separate phrases rather than "New " + label. A translator has to be
+      // able to change the word order and the gender of the noun, and neither is
+      // possible once the pieces are glued together here.
+      title: (field === 'room')
+        ? wp.i18n.__('New room', 'mg-warehouse-stock')
+        : (field === 'rack')
+          ? wp.i18n.__('New rack', 'mg-warehouse-stock')
+          : wp.i18n.__('New shelf', 'mg-warehouse-stock'),
       label: label,
-      placeholder: 'Inserisci ' + label.toLowerCase(),
+      placeholder: (field === 'room')
+        ? wp.i18n.__('Enter a room name', 'mg-warehouse-stock')
+        : (field === 'rack')
+          ? wp.i18n.__('Enter a rack name', 'mg-warehouse-stock')
+          : wp.i18n.__('Enter a shelf name', 'mg-warehouse-stock'),
       hint: hint,
       onSubmit: function (val, done) {
         $.post(MGWS_MASTER.ajaxUrl, {
@@ -560,14 +589,14 @@
           parent_rack: parentRack || ''
         }).done(function (resp) {
           if (!resp || !resp.success) {
-            done((resp && resp.data && resp.data.message) ? resp.data.message : 'Errore');
+            done((resp && resp.data && resp.data.message) ? resp.data.message : wp.i18n.__('Error', 'mg-warehouse-stock'));
             return;
           }
-          setMsg('Salvato', true);
+          setMsg(wp.i18n.__('Saved', 'mg-warehouse-stock'), true);
           load();
           done('');
         }).fail(function () {
-          done('Errore richiesta');
+          done(wp.i18n.__('Request failed', 'mg-warehouse-stock'));
         });
       }
     });
@@ -577,15 +606,23 @@
     var c = ctx();
     var sid = parseInt(siteId, 10) || 0;
     if (!sid) return;
-    var label = (field === 'room') ? 'stanza' : (field === 'rack') ? 'scaffale' : 'mensola';
-
     // No name typing: simple confirm.
-    var msg = 'Eliminare ' + label + ' "' + value + '"?';
+    //
+    // Three complete messages rather than one message with the kind of location
+    // in a %s slot. A translator has to be able to inflect the noun and to move
+    // it around the sentence, and a bare noun in a slot allows neither. It also
+    // keeps the singular nouns "room", "rack" and "shelf" out of the catalogue,
+    // where they would collide with the msgid of the _n() that counts them.
+    var msg = (field === 'room')
+      ? wp.i18n.sprintf(wp.i18n.__('Delete the room "%s"?', 'mg-warehouse-stock'), value)
+      : (field === 'rack')
+        ? wp.i18n.sprintf(wp.i18n.__('Delete the rack "%s"?', 'mg-warehouse-stock'), value)
+        : wp.i18n.sprintf(wp.i18n.__('Delete the shelf "%s"?', 'mg-warehouse-stock'), value);
     if (!window.confirm(msg)) {
       return;
     }
 
-    setMsg('Eliminazione...', true);
+    setMsg(wp.i18n.__('Deleting...', 'mg-warehouse-stock'), true);
     $.post(MGWS_MASTER.ajaxUrl, {
       action: 'mgws_delete_location_value',
       nonce: c.nonce,
@@ -597,15 +634,15 @@
       parent_rack: parentRack || ''
     }).done(function (resp) {
       if (!resp || !resp.success) {
-        var m = (resp && resp.data && resp.data.message) ? resp.data.message : 'Errore';
+        var m = (resp && resp.data && resp.data.message) ? resp.data.message : wp.i18n.__('Error', 'mg-warehouse-stock');
         window.alert(m);
         setMsg('', true);
         return;
       }
-      setMsg('Eliminato', true);
+      setMsg(wp.i18n.__('Deleted', 'mg-warehouse-stock'), true);
       load();
     }).fail(function () {
-      setMsg('Errore richiesta', false);
+      setMsg(wp.i18n.__('Request failed', 'mg-warehouse-stock'), false);
     });
   }
 
@@ -692,15 +729,15 @@
     var scope = 'shelf_one';
 
     if (!wid || !siteId || !room) {
-      setMsg('Seleziona almeno una stanza', false);
+      setMsg(wp.i18n.__('Select at least one room', 'mg-warehouse-stock'), false);
       return;
     }
     if (!rack || !shelf) {
-      setMsg('Seleziona scaffale e mensola', false);
+      setMsg(wp.i18n.__('Select a rack and a shelf', 'mg-warehouse-stock'), false);
       return;
     }
 
-    setMsg('Salvataggio collegamento...', true);
+    setMsg(wp.i18n.__('Saving the link...', 'mg-warehouse-stock'), true);
     $.post(MGWS_MASTER.ajaxUrl, {
       action: 'mgws_link_warehouse_location',
       nonce: c.nonce,
@@ -711,13 +748,13 @@
       scope: scope
     }).done(function (resp) {
       if (!resp || !resp.success) {
-        setMsg((resp && resp.data && resp.data.message) ? resp.data.message : 'Errore', false);
+        setMsg((resp && resp.data && resp.data.message) ? resp.data.message : wp.i18n.__('Error', 'mg-warehouse-stock'), false);
         return;
       }
-      setMsg('Collegato', true);
+      setMsg(wp.i18n.__('Linked', 'mg-warehouse-stock'), true);
       load();
     }).fail(function () {
-      setMsg('Errore richiesta', false);
+      setMsg(wp.i18n.__('Request failed', 'mg-warehouse-stock'), false);
     });
   });
 
@@ -731,8 +768,8 @@
     var shelf = String($(this).data('shelf') || '');
     var scope = String($(this).data('scope') || '');
     if (!wid || !room || !scope) return;
-    if (!window.confirm('Rimuovere collegamento?')) return;
-    setMsg('Rimozione...', true);
+    if (!window.confirm(wp.i18n.__('Remove the link?', 'mg-warehouse-stock'))) return;
+    setMsg(wp.i18n.__('Removing...', 'mg-warehouse-stock'), true);
     $.post(MGWS_MASTER.ajaxUrl, {
       action: 'mgws_unlink_warehouse_location',
       nonce: c.nonce,
@@ -743,13 +780,13 @@
       scope: scope
     }).done(function (resp) {
       if (!resp || !resp.success) {
-        setMsg((resp && resp.data && resp.data.message) ? resp.data.message : 'Errore', false);
+        setMsg((resp && resp.data && resp.data.message) ? resp.data.message : wp.i18n.__('Error', 'mg-warehouse-stock'), false);
         return;
       }
-      setMsg('Rimosso', true);
+      setMsg(wp.i18n.__('Removed', 'mg-warehouse-stock'), true);
       load();
     }).fail(function () {
-      setMsg('Errore richiesta', false);
+      setMsg(wp.i18n.__('Request failed', 'mg-warehouse-stock'), false);
     });
   });
 
@@ -757,13 +794,13 @@
     var c = ctx();
     var wid = parseInt($(this).data('warehouse-id'), 10) || 0;
     if (!wid) return;
-    if (!window.confirm('Eliminare questo magazzino?')) return;
-    setMsg('Eliminazione...', true);
+    if (!window.confirm(wp.i18n.__('Delete this warehouse?', 'mg-warehouse-stock'))) return;
+    setMsg(wp.i18n.__('Deleting...', 'mg-warehouse-stock'), true);
     $.post(MGWS_MASTER.ajaxUrl, { action: 'mgws_delete_warehouse', nonce: c.nonce, warehouse_id: wid })
       .done(function (resp) {
         if (!resp || !resp.success) {
-          var m = (resp && resp.data && resp.data.message) ? resp.data.message : 'Errore';
-          if (String(m).indexOf('Impossibile eliminare') === 0) {
+          var m = (resp && resp.data && resp.data.message) ? resp.data.message : wp.i18n.__('Error', 'mg-warehouse-stock');
+          if (resp && resp.data && resp.data.code === 'mgws_not_deletable') {
             window.alert(m);
             setMsg('', true);
             return;
@@ -771,11 +808,11 @@
           setMsg(m, false);
           return;
         }
-        setMsg('Magazzino eliminato', true);
+        setMsg(wp.i18n.__('Warehouse deleted', 'mg-warehouse-stock'), true);
         load();
       })
       .fail(function () {
-        setMsg('Errore richiesta', false);
+        setMsg(wp.i18n.__('Request failed', 'mg-warehouse-stock'), false);
       });
   });
 
@@ -783,13 +820,13 @@
     var c = ctx();
     var sid = parseInt($(this).data('site-id'), 10) || 0;
     if (!sid) return;
-    if (!window.confirm('Eliminare questa sede?')) return;
-    setMsg('Eliminazione...', true);
+    if (!window.confirm(wp.i18n.__('Delete this site?', 'mg-warehouse-stock'))) return;
+    setMsg(wp.i18n.__('Deleting...', 'mg-warehouse-stock'), true);
     $.post(MGWS_MASTER.ajaxUrl, { action: 'mgws_delete_site', nonce: c.nonce, site_id: sid })
       .done(function (resp) {
         if (!resp || !resp.success) {
-          var m = (resp && resp.data && resp.data.message) ? resp.data.message : 'Errore';
-          if (String(m).indexOf('Impossibile eliminare') === 0) {
+          var m = (resp && resp.data && resp.data.message) ? resp.data.message : wp.i18n.__('Error', 'mg-warehouse-stock');
+          if (resp && resp.data && resp.data.code === 'mgws_not_deletable') {
             window.alert(m);
             setMsg('', true);
             return;
@@ -797,11 +834,11 @@
           setMsg(m, false);
           return;
         }
-        setMsg('Sede eliminata', true);
+        setMsg(wp.i18n.__('Site deleted', 'mg-warehouse-stock'), true);
         load();
       })
       .fail(function () {
-        setMsg('Errore richiesta', false);
+        setMsg(wp.i18n.__('Request failed', 'mg-warehouse-stock'), false);
       });
   });
 
